@@ -16,6 +16,10 @@ enum Location {
 
 enum Action {
 
+	/*
+		
+	*/
+
 	JUMP,
 	SHOUT,
 	LOOK,
@@ -28,6 +32,7 @@ enum Action {
 	EXIT_WEST,
 	NULL_ACTION,
 	GODMODE_TOGGLE,
+	GIBBERISH,
 	QUIT
 
 	}
@@ -48,10 +53,8 @@ public class Game {
 
 	public static void main(String[] args)
 	{
-		System.out.println("Begin program.");
 
-
-		String playerInput = "";
+		String[] playerInput = {};
 		Action playerAction = Action.NULL_ACTION;
 		Scanner sc = new Scanner(System.in);
 		GameState gameState = new GameState();
@@ -74,16 +77,13 @@ public class Game {
 
 		endGame(gameState);
 		
-
-		System.out.println("End program.");
 	}
 
 
 	private static void initGame(GameState state)
 	{		
 
-		// Put the player in the starting location
-		state.setPlayerLocation(Location.RED_ROOM);
+		
 
 		// Create the world map
 
@@ -111,51 +111,59 @@ public class Game {
 		worldMap.put(Location.BLUE_ROOM, blueRoom);
 
 		Item itemRope = new Item("Rope", Location.GREEN_ROOM);
+		Item itemEgg = new Item("Egg", Location.BLUE_ROOM);
 
 		itemList.add(itemRope);
+		itemList.add(itemEgg);
 
 
+		// Put the player in the starting location
+		state.setPlayerLocation(Location.RED_ROOM);
+		redRoom.firstVisit = false;
+
+		outputLine();
+		output(StringList.INTRO);
 		
 
-		System.out.println("Game initialized.");
 	}
 
 
 
-	private static String getPlayerInput(Scanner sc, GameState state)
+	private static String[] getPlayerInput(Scanner sc, GameState state)
 	{
-		String result = "";
+		String[] result = {};
 
 		outputLine();
-		output(worldMap.get(state.getPlayerLocation()).roomName);
 		prompt();
 
-		result = sc.nextLine();
+		String input = sc.nextLine().toLowerCase();
+
+		result = input.split(" ");
 
 		return result;
 	}
 
-	private static Action parseInput(String input)
+	private static Action parseInput(String[] input)
 	{
 		Action result = Action.NULL_ACTION;
 
-		// System.out.println("Input was " + input);
+		if (input.length < 1) return Action.NULL_ACTION;
 
-		input = input.toLowerCase();
+		String first = input[0];
 
-		if (input.contentEquals("quit")) { result = Action.QUIT; }
-		if (input.contentEquals("jump")) { result = Action.JUMP; }
-		if (input.contentEquals("shout")) { result = Action.SHOUT; }
-		if (input.contentEquals("look") || input.contentEquals("l")) { result = Action.LOOK; }
-		if (input.contentEquals("inventory") || input.contentEquals("i")) { result = Action.INVENTORY; }
-		if (input.contentEquals("take")) { result = Action.TAKE; }
-		if (input.contentEquals("drop")) { result = Action.DROP; }
-		if (input.contentEquals("north") || input.contentEquals("n")) { result = Action.EXIT_NORTH; }
-		if (input.contentEquals("south") || input.contentEquals("s")) { result = Action.EXIT_SOUTH; }
-		if (input.contentEquals("east") || input.contentEquals("e")) { result = Action.EXIT_EAST; }
-		if (input.contentEquals("west") || input.contentEquals("w")) { result = Action.EXIT_WEST; }
+		if (first.contentEquals("quit") || first.contentEquals("q")) { result = Action.QUIT; }
+		if (first.contentEquals("jump")) { result = Action.JUMP; }
+		if (first.contentEquals("shout")) { result = Action.SHOUT; }
+		if (first.contentEquals("look") || first.contentEquals("l")) { result = Action.LOOK; }
+		if (first.contentEquals("inventory") || first.contentEquals("i")) { result = Action.INVENTORY; }
+		if (first.contentEquals("take")) { result = Action.TAKE; }
+		if (first.contentEquals("drop")) { result = Action.DROP; }
+		if (first.contentEquals("north") || first.contentEquals("n")) { result = Action.EXIT_NORTH; }
+		if (first.contentEquals("south") || first.contentEquals("s")) { result = Action.EXIT_SOUTH; }
+		if (first.contentEquals("east") || first.contentEquals("e")) { result = Action.EXIT_EAST; }
+		if (first.contentEquals("west") || first.contentEquals("w")) { result = Action.EXIT_WEST; }
 
-		if (input.contentEquals("computer"))
+		if (first.contentEquals("computer"))
 		{
 			output("Standing by.");
 			prompt();
@@ -171,6 +179,7 @@ public class Game {
 				result = Action.NULL_ACTION;
 			}
 		}
+		
 
 		return result;
 	}
@@ -178,7 +187,11 @@ public class Game {
 
 	private static void updateGame(Action action, GameState state)
 	{
+
+
+
 		Location curLoc = state.getPlayerLocation();
+		Room curRoom = worldMap.get(curLoc);
 
 
 		switch (action)
@@ -196,14 +209,14 @@ public class Game {
 
 			case LOOK:
 			{
-				Room r = worldMap.get(curLoc);
-				output(r.fullDescription);
+				output(curRoom.fullDescription);
 
 				for (Item i : itemList)
 				{
 					if (i.getLocation() == curLoc)
 					{
-						output("There is a " + i.itemName + " here.");
+						String word = (i.vowelStart()? "an" : "a");
+						output("There is " + word + " " + i.itemName + " here.");
 					}
 				}
 
@@ -250,70 +263,42 @@ public class Game {
 			} break;
 
 			case EXIT_NORTH:
-			{
-				Location dest = worldMap.get(state.getPlayerLocation()).northExit;
-
-				if (dest != Location.NULL_LOCATION)
-				{
-					state.setPreviousLocation(curLoc);
-					state.setPlayerLocation(dest);				
-				}
-
-				else if (dest == Location.NULL_LOCATION)
-				{
-					output("You can't go that way.");
-				}
-
-
-			} break;
-
 			case EXIT_SOUTH:
-			{
-				Location dest = worldMap.get(state.getPlayerLocation()).southExit;
-
-				if (dest != Location.NULL_LOCATION)
-				{
-					state.setPlayerLocation(dest);				
-				}
-
-				else if (dest == Location.NULL_LOCATION)
-				{
-					output("You can't go that way.");
-				}
-
-			} break;
-
 			case EXIT_EAST:
-			{
-				Location dest = worldMap.get(state.getPlayerLocation()).eastExit;
-
-				if (dest != Location.NULL_LOCATION)
-				{
-					state.setPlayerLocation(dest);				
-				}
-
-				else if (dest == Location.NULL_LOCATION)
-				{
-					output("You can't go that way.");
-				}
-
-			} break;
-
 			case EXIT_WEST:
 			{
-				Location dest = worldMap.get(state.getPlayerLocation()).westExit;
-
-				if (dest != Location.NULL_LOCATION)
+				Location dest = Location.NULL_LOCATION;
+				switch (action)
 				{
-					state.setPlayerLocation(dest);				
+					case EXIT_NORTH: { dest = curRoom.northExit; } break;
+					case EXIT_SOUTH: { dest = curRoom.southExit; } break;
+					case EXIT_EAST: { dest = curRoom.eastExit; } break;
+					case EXIT_WEST: { dest = curRoom.westExit; } break;
+					default: {} break;
+
 				}
 
-				else if (dest == Location.NULL_LOCATION)
+				if (dest == Location.NULL_LOCATION) output("You can't go that way.");
+				else
 				{
-					output("You can't go that way.");
+					state.setPreviousLocation(curLoc);
+					state.setPlayerLocation(dest);
+
+					curLoc = dest;
+					curRoom = worldMap.get(curLoc);
+
+					output(curRoom.roomName);
+					outputLine();
+					if (curRoom.firstVisit)
+					{
+						output(curRoom.fullDescription);
+						curRoom.firstVisit = false;
+						outputLine();
+					}
 				}
 
 			} break;
+
 
 			case GODMODE_TOGGLE:
 			{
@@ -333,7 +318,7 @@ public class Game {
 
 			case NULL_ACTION:
 			{
-				output("No action selected.");
+				output("What?");
 			}
 
 			default:
@@ -356,6 +341,7 @@ public class Game {
 	private static void prompt() { System.out.print(">> "); }
 	private static void outputLine() { System.out.println(); }
 	private static void output(String s) { System.out.println(s); }
+
 
 
 	private static void endGame(GameState state)

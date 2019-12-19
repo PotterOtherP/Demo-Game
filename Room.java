@@ -8,7 +8,7 @@ class Room {
 	protected final Location eastExit;
 	protected final Location westExit;
 
-
+	protected boolean firstVisit;
 
 	public Room()
 	{
@@ -19,6 +19,7 @@ class Room {
 		southExit = Location.NULL_LOCATION;
 		eastExit = Location.NULL_LOCATION;
 		westExit = Location.NULL_LOCATION;
+		firstVisit = true;
 	}
 
 	public Room(String name, String fullDesc, Location id, Location north, Location south, Location east, Location west)
@@ -30,6 +31,7 @@ class Room {
 		this.southExit = south;
 		this.eastExit = east;
 		this.westExit = west;
+		this.firstVisit = true;
 	}
 
 
