@@ -18,19 +18,6 @@ enum Location {
 
 enum Action {
 
-	/*
-		Reflexive actions: one word (jump, shout, dance, quit)
-	*/
-
-	/*
-		Direct object: one verb, one object, modifiers.
-			(Attack the troll with the rusty knife)
-			(Say *words*)
-			(Take rope)
-			(Open trap door)
-
-
-	*/
 
 	JUMP,
 	SHOUT,
@@ -41,6 +28,7 @@ enum Action {
 	EXIT_EAST,
 	EXIT_WEST,
 	NULL_ACTION,
+	FAIL_ACTION,
 	GODMODE_TOGGLE,
 	GIBBERISH,
 	QUIT,
@@ -48,7 +36,9 @@ enum Action {
 	PROFANITY,
 
 	TAKE,
-	DROP
+	DROP,
+	SAY,
+	ACTIVATE
 
 	}
 
@@ -97,19 +87,19 @@ public class Game {
 		// Create the world map
 
 		Room redRoom = new Room("Red Room", "This is a red room.", Location.RED_ROOM, Location.GREEN_ROOM, Location.BLACK_ROOM,
-			Location.WHITE_ROOM, Location.BLUE_ROOM);
+			Location.WHITE_ROOM, Location.BLUE_ROOM, Location.NULL_LOCATION, Location.NULL_LOCATION);
 
 		Room greenRoom = new Room("Green Room", "This is a green room.", Location.GREEN_ROOM, Location.NULL_LOCATION, Location.RED_ROOM,
-			Location.WHITE_ROOM, Location.BLUE_ROOM);
+			Location.WHITE_ROOM, Location.BLUE_ROOM, Location.NULL_LOCATION, Location.NULL_LOCATION);
 
 		Room blackRoom = new Room("Black Room", "This is a black room.", Location.BLACK_ROOM, Location.RED_ROOM, Location.NULL_LOCATION,
-			Location.WHITE_ROOM, Location.BLUE_ROOM);
+			Location.WHITE_ROOM, Location.BLUE_ROOM, Location.NULL_LOCATION, Location.NULL_LOCATION);
 
 		Room whiteRoom = new Room("White Room", "This is a white room.", Location.WHITE_ROOM, Location.GREEN_ROOM, Location.BLACK_ROOM,
-			Location.NULL_LOCATION, Location.RED_ROOM);
+			Location.NULL_LOCATION, Location.RED_ROOM, Location.NULL_LOCATION, Location.NULL_LOCATION);
 
 		Room blueRoom = new Room("Blue Room", "This is a blue room.", Location.BLUE_ROOM, Location.GREEN_ROOM, Location.BLACK_ROOM,
-			Location.RED_ROOM, Location.NULL_LOCATION);
+			Location.RED_ROOM, Location.NULL_LOCATION, Location.NULL_LOCATION, Location.NULL_LOCATION);
 
 		
 
@@ -204,7 +194,27 @@ public class Game {
 		if (first.contentEquals("take"))
 		{
 			resultAction = Action.TAKE;
-			resultItem = itemList.get(second);
+
+			if (!second.isEmpty())
+			{				
+				resultItem = itemList.get(second);
+			}
+
+			if (second.isEmpty())
+			{
+				output("What do you want to take?");
+				String nxt = scn.nextLine();
+				try 
+				{ 
+					resultItem = itemList.get(nxt);
+				}
+				catch (Exception ex)
+				{
+					output("That's not something you can take.");
+					resultAction = Action.FAIL_ACTION;
+				}
+			}
+
 		}
 
 		if (first.contentEquals("drop"))
@@ -229,6 +239,11 @@ public class Game {
 
 		switch (action)
 		{
+			case FAIL_ACTION:
+			{
+				output("Fail action.");
+			} break;
+
 			case JUMP:
 			{
 				output("Wheeeeeeee!");
@@ -249,7 +264,7 @@ public class Game {
 					if (i.getLocation() == curLoc)
 					{
 						String word = (i.vowelStart()? "an" : "a");
-						output("There is " + word + " " + i.itemName + " here.");
+						output("There is " + word + " " + i.name + " here.");
 					}
 				}
 
@@ -261,7 +276,7 @@ public class Game {
 				if (item.getLocation() == curLoc)
 				{
 					item.setLocation(Location.PLAYER_INVENTORY);
-					output("You picked up the " + item.itemName + ".");
+					output("You picked up the " + item.name + ".");
 				}	
 			} break;
 
@@ -271,7 +286,7 @@ public class Game {
 				if (item.getLocation() == Location.PLAYER_INVENTORY)
 				{
 					item.setLocation(curLoc);
-					output("You dropped the " + item.itemName + ".");
+					output("You dropped the " + item.name + ".");
 				}
 			} break;
 
@@ -281,7 +296,7 @@ public class Game {
 				for (Item i : itemList.values())
 				{
 					if (i.getLocation() == Location.PLAYER_INVENTORY)
-						output(i.itemName);
+						output(i.name);
 				}
 			} break;
 
@@ -315,7 +330,7 @@ public class Game {
 					curLoc = dest;
 					curRoom = worldMap.get(curLoc);
 
-					output(curRoom.roomName);
+					output(curRoom.name);
 					outputLine();
 					if (curRoom.firstVisit)
 					{
@@ -373,6 +388,7 @@ public class Game {
 
 	private static void prompt() { System.out.print(">> "); }
 	private static void outputLine() { System.out.println(); }
+	private static void output() { System.out.println(); }
 	private static void output(String s) { System.out.println(s); }
 
 
