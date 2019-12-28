@@ -2,31 +2,39 @@ class Item {
 
 	// Items that can be picked up and moved
 
-	protected final String itemName;
+	protected final String name;
 	
-	private Location itemLocation;
-	private boolean inInventory;
+	private Location location;
+
+	public Item()
+	{
+		this.name = "";
+		this.location = Location.NULL_LOCATION;
+
+	}
 
 	public Item(String name, Location loc)
 	{
-		this.itemName = name;
-		this.itemLocation = loc;
-		this.inInventory = false;
+		this.name = name;
+		this.location = loc;
 	}
 
 
 
-	public void setLocation(Location loc) { itemLocation = loc; }
-	public Location getLocation() { return itemLocation; }
-	public void addToInventory() { inInventory = true; }
-	public void removeFromInventory() { inInventory = false; }
-	public boolean isInInventory() { return inInventory; }
+	public void setLocation(Location loc) { location = loc; }
+	public Location getLocation() { return location; }
 
 	public boolean vowelStart()
 	{
+		// Exceptions can go here
+		if (false)
+		{
+			return true;
+		}
+
 		boolean result = false;
 
-		String str = itemName.toLowerCase();
+		String str = this.name.toLowerCase();
 		char c  = str.charAt(0);
 
 		switch(c)

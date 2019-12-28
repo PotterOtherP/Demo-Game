@@ -2,5 +2,13 @@ class Feature {
 	
 	// Objects and features of rooms that can't be moved or added to the player's inventory.
 
-	protected final Location featureLoc;
+	protected final String name;	
+	protected final Location location;
+
+
+	public Feature(String name, Location loc)
+	{
+		this.name = name;
+		this.location = loc;
+	}
 }
