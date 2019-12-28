@@ -5,6 +5,12 @@ class Feature {
 	protected final String name;	
 	protected final Location location;
 
+	public Feature()
+	{
+		this.name = "";
+		this.location = Location.NULL_LOCATION;
+	}
+
 
 	public Feature(String name, Location loc)
 	{

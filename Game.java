@@ -58,11 +58,12 @@ public class Game {
 	private static HashMap<String, Item> itemList = new HashMap<String, Item>();
 	private static HashMap<String, Action> commands = new HashMap<String, Action>();
 
+	private static Location initialLocation = Location.RED_ROOM;
+
 
 	public static void main(String[] args)
 	{
 
-		Scanner scn = new Scanner(System.in);
 		GameState gameState = new GameState();
 
 		
@@ -75,8 +76,12 @@ public class Game {
 
 		while (!gameover)
 		{	
-			getPlayerInput(scn, gameState);
-			updateGame(gameState);
+
+			getPlayerAction(gameState);
+			if (validateAction(gameState))
+			{
+				updateGame(gameState);
+			}
 		}
 
 
@@ -130,27 +135,26 @@ public class Game {
 		commands.put("e",     Action.EXIT_EAST);
 		commands.put("west",  Action.EXIT_WEST);
 		commands.put("w",     Action.EXIT_WEST);
+		commands.put("up",	  Action.EXIT_UP);
+		commands.put("u",	  Action.EXIT_UP);
+		commands.put("down",  Action.EXIT_DOWN);
+		commands.put("d",     Action.EXIT_DOWN);
 		commands.put("quit",  Action.QUIT);
 		commands.put("q",     Action.QUIT);
 		commands.put("jump",  Action.JUMP);
 		commands.put("look",  Action.LOOK);
 		commands.put("l",     Action.LOOK);
 		commands.put("inventory", Action.INVENTORY);
-		commands.put("i",        Action.INVENTORY);
+		commands.put("i",         Action.INVENTORY);
 		commands.put("shout", Action.SHOUT);
 		commands.put("yell",  Action.SHOUT);
-		commands.put("fuck", Action.PROFANITY);
-		commands.put("shit", Action.PROFANITY);
+		commands.put("fuck",  Action.PROFANITY);
+		commands.put("shit",  Action.PROFANITY);
 
-
-		// Initialize the gamestate
-
-		state.setPlayerAction(Action.NULL_ACTION);
-		state.setActionItem(emptyItem);
 
 		// Put the player in the starting location
-		state.setPlayerLocation(Location.RED_ROOM);
-		redRoom.firstVisit = false;
+		state.setPlayerLocation(initialLocation);
+		worldMap.get(initialLocation).firstVisit = false;
 
 		// Beginning text of the game.
 		outputLine();
@@ -159,88 +163,52 @@ public class Game {
 	}
 
 
-
-	private static void getPlayerInput(Scanner scn, GameState state)
+	private static void getPlayerAction(GameState state)
 	{
-		outputLine();
+
+
+		state.setPlayerAction(Action.NULL_ACTION);
+
 		prompt();
+		String playerText = getPlayerText();
+		state.setPlayerInput(playerText);
+		String inputWords[] = playerText.split(" ");
 
-		String playerInput = scn.nextLine().toLowerCase();
-		String[] input = playerInput.split(" ");
-
-		String first = "";
-		String second = "";
-		String third = "";
-		String fourth = "";
-		String fifth = "";
-		String sixth = "";
-		String seventh = "";
-		String eighth = "";
-		String ninth = "";
-		String tenth = "";
-
-		try { first = input[0]; } catch (Exception e) {}
-		try { second = input[1]; } catch (Exception e) {}
-		try { third = input[2]; } catch (Exception e) {}
-		try { fourth = input[3]; } catch (Exception e) {}
-		try { fifth = input[4]; } catch (Exception e) {}
-		try { sixth = input[5]; } catch (Exception e) {}
-		try { seventh = input[6]; } catch (Exception e) {}
-		try { eighth = input[7]; } catch (Exception e) {}
-		try { ninth = input[8]; } catch (Exception e) {}
-		try { tenth = input[9]; } catch (Exception e) {}
-
-		Action resultAction = Action.NULL_ACTION;
-		Item resultItem = itemList.get("empty");
-
-		int len = input.length;
-		if (len < 1)
+		switch(inputWords.length)
 		{
-			state.setPlayerAction(Action.NULL_ACTION);
-			return;
-		}
-		
-
-		// Reflexive actions
-
-		if (commands.containsKey(first))
-		{
-			resultAction = commands.get(first);
-		}
-
-		if (first.contentEquals("take"))
-		{
-			resultAction = Action.TAKE;
-
-			if (!second.isEmpty())
-			{				
-				resultItem = itemList.get(second);
-			}
-
-			if (second.isEmpty())
+			case 0:
 			{
-				output("What do you want to take?");
-				prompt();
-				String nxt = scn.nextLine();
-				if (itemList.containsKey(nxt)) { resultItem = itemList.get(nxt); }
-				else
-				{
-					output("That's not something you can take.");
-					resultAction = Action.FAIL_ACTION;
-				}
-			}
+				state.setPlayerAction(Action.NULL_ACTION);
+			} break;
+
+			case 1:
+			{
+				String first = inputWords[0];
+				if (commands.containsKey(first)) { state.setPlayerAction(commands.get(first)); }
+
+			} break;
+
+			default:
+			{
+				state.setPlayerAction(Action.NULL_ACTION);
+			} break;
 
 		}
 
-		if (first.contentEquals("drop"))
-		{
-			resultAction = Action.DROP;
-			resultItem = itemList.get(second);
-		}
-		
 
-		state.setPlayerAction(resultAction);
-		state.setActionItem(resultItem);
+
+
+	}
+
+
+	private static boolean validateAction(GameState state)
+	{
+		boolean result = true;
+
+
+
+
+		return result;
 	}
 
 
@@ -418,6 +386,12 @@ public class Game {
 	private static void outputLine() { System.out.println(); }
 	private static void output() { System.out.println(); }
 	private static void output(String s) { System.out.println(s); }
+	private static String getPlayerText()
+	{
+		Scanner scn = new Scanner(System.in);
+
+		return scn.nextLine();
+	}
 
 
 
