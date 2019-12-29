@@ -36,11 +36,15 @@ enum Action {
 	QUIT,
 	VERBOSE,
 	PROFANITY,
+	WAIT,
 
 	TAKE,
 	DROP,
-	SAY,
-	ACTIVATE
+	SPEAK,
+	ACTIVATE,
+	OPEN_CLOSE,
+
+	ATTACK
 
 	}
 
@@ -56,7 +60,12 @@ public class Game {
 
 	private static HashMap<Location, Room> worldMap = new HashMap<Location, Room>();
 	private static HashMap<String, Item> itemList = new HashMap<String, Item>();
-	private static HashMap<String, Action> commands = new HashMap<String, Action>();
+	private static HashMap<String, Feature> featureList = new HashMap<String, Feature>();
+	private static HashMap<String, Action> commandOne = new HashMap<String, Action>();
+	private static HashMap<String, Action> commandTwo = new HashMap<String, Action>();
+	private static HashMap<String, Action> commandThree = new HashMap<String, Action>();
+
+	private static ArrayList<String> fakeItems = new ArrayList<String>();
 
 	private static Location initialLocation = Location.RED_ROOM;
 
@@ -119,42 +128,55 @@ public class Game {
 
 
 		// Create the item objects
-		Item emptyItem = new Item("None", Location.NULL_LOCATION);
-		Item itemRope = new Item("Rope", Location.GREEN_ROOM);
-		Item itemEgg = new Item("Egg", Location.BLUE_ROOM);
+		Item emptyItem = new Item("none", Location.NULL_LOCATION);
+		Item itemRope = new Item("rope", Location.GREEN_ROOM);
+		Item itemEgg = new Item("egg", Location.BLUE_ROOM);
 
 		itemList.put("rope", itemRope);
 		itemList.put("egg", itemEgg);
 		itemList.put("empty", emptyItem);
 
-		commands.put("north", Action.EXIT_NORTH);
-		commands.put("n",     Action.EXIT_NORTH);
-		commands.put("south", Action.EXIT_SOUTH);
-		commands.put("s",     Action.EXIT_SOUTH);
-		commands.put("east",  Action.EXIT_EAST);
-		commands.put("e",     Action.EXIT_EAST);
-		commands.put("west",  Action.EXIT_WEST);
-		commands.put("w",     Action.EXIT_WEST);
-		commands.put("up",	  Action.EXIT_UP);
-		commands.put("u",	  Action.EXIT_UP);
-		commands.put("down",  Action.EXIT_DOWN);
-		commands.put("d",     Action.EXIT_DOWN);
-		commands.put("quit",  Action.QUIT);
-		commands.put("q",     Action.QUIT);
-		commands.put("jump",  Action.JUMP);
-		commands.put("look",  Action.LOOK);
-		commands.put("l",     Action.LOOK);
-		commands.put("inventory", Action.INVENTORY);
-		commands.put("i",         Action.INVENTORY);
-		commands.put("shout", Action.SHOUT);
-		commands.put("yell",  Action.SHOUT);
-		commands.put("fuck",  Action.PROFANITY);
-		commands.put("shit",  Action.PROFANITY);
+		fakeItems.add("juniper");
+
+
+		// Create the feature objects
+
+		commandOne.put("north", Action.EXIT_NORTH);
+		commandOne.put("n",     Action.EXIT_NORTH);
+		commandOne.put("south", Action.EXIT_SOUTH);
+		commandOne.put("s",     Action.EXIT_SOUTH);
+		commandOne.put("east",  Action.EXIT_EAST);
+		commandOne.put("e",     Action.EXIT_EAST);
+		commandOne.put("west",  Action.EXIT_WEST);
+		commandOne.put("w",     Action.EXIT_WEST);
+		commandOne.put("up",	Action.EXIT_UP);
+		commandOne.put("u",	    Action.EXIT_UP);
+		commandOne.put("down",  Action.EXIT_DOWN);
+		commandOne.put("d",     Action.EXIT_DOWN);
+		commandOne.put("quit",  Action.QUIT);
+		commandOne.put("q",     Action.QUIT);
+		commandOne.put("jump",  Action.JUMP);
+		commandOne.put("look",  Action.LOOK);
+		commandOne.put("l",     Action.LOOK);
+		commandOne.put("inventory", Action.INVENTORY);
+		commandOne.put("i",         Action.INVENTORY);
+		commandOne.put("fuck",  Action.PROFANITY);
+		commandOne.put("shit",  Action.PROFANITY);
+		commandOne.put("shout", Action.SHOUT);
+		commandOne.put("yell",  Action.SHOUT);
+
+		commandTwo.put("take", Action.TAKE);
+		commandTwo.put("drop", Action.DROP);
+		commandTwo.put("open", Action.OPEN_CLOSE);
+		commandTwo.put("close", Action.OPEN_CLOSE);
+		commandTwo.put("say", Action.SPEAK);
 
 
 		// Put the player in the starting location
-		state.setPlayerLocation(initialLocation);
+		state.setCurrentLocation(initialLocation);
 		worldMap.get(initialLocation).firstVisit = false;
+
+		blackRoom.northExitOpen = false;
 
 		// Beginning text of the game.
 		outputLine();
@@ -165,32 +187,65 @@ public class Game {
 
 	private static void getPlayerAction(GameState state)
 	{
+		
 
 
-		state.setPlayerAction(Action.NULL_ACTION);
+		state.setCurrentAction(Action.NULL_ACTION);
+		state.setActionItem(itemList.get("empty"));
+		state.setPlayerInput("");
+		state.setAddInputOne("");
+		state.setAddInputTwo("");
 
-		prompt();
 		String playerText = getPlayerText();
 		state.setPlayerInput(playerText);
 		String inputWords[] = playerText.split(" ");
+
+		String first = "";
+		String second = "";
+		String third = "";
+		String fourth = "";
 
 		switch(inputWords.length)
 		{
 			case 0:
 			{
-				state.setPlayerAction(Action.NULL_ACTION);
+				state.setCurrentAction(Action.NULL_ACTION);
 			} break;
 
 			case 1:
 			{
-				String first = inputWords[0];
-				if (commands.containsKey(first)) { state.setPlayerAction(commands.get(first)); }
+				first = inputWords[0];
+				if (commandOne.containsKey(first)) { state.setCurrentAction(commandOne.get(first)); }
+
+			} break;
+
+			case 2:
+			{
+				first = inputWords[0];
+				second = inputWords[1];
+
+				if (commandTwo.containsKey(first)) { state.setCurrentAction(commandTwo.get(first)); }
+				if (itemList.containsKey(second)) { state.setActionItem(itemList.get(second)); }
+				if (featureList.containsKey(second)) { state.setActionFeature(featureList.get(second)); }
+
+			} break;
+
+
+			case 3:
+			{
+				first = inputWords[0];
+				second = inputWords[1];
+				third =  inputWords[2];
+
+				if (commandThree.containsKey(first)) { state.setCurrentAction(commandThree.get(first)); }
+				if (featureList.containsKey(second)) { state.setActionFeature(featureList.get(second)); }
+				if (itemList.containsKey(third)) { state.setActionItem(itemList.get(third)); }
 
 			} break;
 
 			default:
 			{
-				state.setPlayerAction(Action.NULL_ACTION);
+				state.setCurrentAction(Action.NULL_ACTION);
 			} break;
 
 		}
@@ -215,8 +270,8 @@ public class Game {
 	private static void updateGame(GameState state)
 	{
 
-		Action action = state.getPlayerAction();
-		Location curLoc = state.getPlayerLocation();
+		Action action = state.getCurrentAction();
+		Location curLoc = state.getCurrentLocation();
 		Room curRoom = worldMap.get(curLoc);
 
 
@@ -261,6 +316,10 @@ public class Game {
 					item.setLocation(Location.PLAYER_INVENTORY);
 					output("You picked up the " + item.name + ".");
 				}
+				else if (item.name == "none")
+				{
+
+				}
 				else
 				{
 					output("There's no " + item.name + " here.");
@@ -274,6 +333,10 @@ public class Game {
 				{
 					item.setLocation(curLoc);
 					output("You dropped the " + item.name + ".");
+				}
+				else if (item.name == "none")
+				{
+
 				}
 				else
 				{
@@ -300,14 +363,18 @@ public class Game {
 			case EXIT_SOUTH:
 			case EXIT_EAST:
 			case EXIT_WEST:
+			case EXIT_UP:
+			case EXIT_DOWN:
 			{
 				Location dest = Location.NULL_LOCATION;
 				switch (action)
 				{
-					case EXIT_NORTH: { dest = curRoom.northExit; } break;
-					case EXIT_SOUTH: { dest = curRoom.southExit; } break;
-					case EXIT_EAST: { dest = curRoom.eastExit; } break;
-					case EXIT_WEST: { dest = curRoom.westExit; } break;
+					case EXIT_NORTH: { if (curRoom.northExitOpen)  dest = curRoom.northExit; } break;
+					case EXIT_SOUTH: { if (curRoom.southExitOpen)  dest = curRoom.southExit; } break;
+					case EXIT_EAST:  { if (curRoom.eastExitOpen)   dest = curRoom.eastExit;  } break;
+					case EXIT_WEST:  { if (curRoom.westExitOpen)   dest = curRoom.westExit;  } break;
+					case EXIT_UP:    { if (curRoom.upExitOpen)     dest = curRoom.upExit;    } break;
+					case EXIT_DOWN:  { if (curRoom.downExitOpen)   dest = curRoom.downExit;  } break;
 					default: {} break;
 
 				}
@@ -316,7 +383,7 @@ public class Game {
 				else
 				{
 					state.setPreviousLocation(curLoc);
-					state.setPlayerLocation(dest);
+					state.setCurrentLocation(dest);
 
 					curLoc = dest;
 					curRoom = worldMap.get(curLoc);
@@ -352,7 +419,7 @@ public class Game {
 
 			case NULL_ACTION:
 			{
-				output("What?");
+				output("I don't understand that.");
 			} break;
 
 			case VERBOSE:
@@ -389,8 +456,22 @@ public class Game {
 	private static String getPlayerText()
 	{
 		Scanner scn = new Scanner(System.in);
+		String result = "";
+		prompt();
 
-		return scn.nextLine();
+		while(result.isEmpty())
+		{
+			result = scn.nextLine();
+
+			if (result.isEmpty())
+			{
+				output("What?");
+				prompt();
+			}
+		}
+
+
+		return result.toLowerCase();
 	}
 
 
