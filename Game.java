@@ -79,8 +79,6 @@ public class Game {
 		initGame(gameState);
 
 
-
-
 		gameover = false;
 
 		while (!gameover)
@@ -103,19 +101,19 @@ public class Game {
 	{		
 		// Create the world map
 
-		Room redRoom = new Room("Red Room", "This is a red room.", Location.RED_ROOM, Location.GREEN_ROOM, Location.BLACK_ROOM,
+		Room redRoom = new Room("Red Room", StringList.DESCREDROOM, Location.RED_ROOM, Location.GREEN_ROOM, Location.BLACK_ROOM,
 			Location.WHITE_ROOM, Location.BLUE_ROOM, Location.NULL_LOCATION, Location.NULL_LOCATION);
 
-		Room greenRoom = new Room("Green Room", "This is a green room.", Location.GREEN_ROOM, Location.NULL_LOCATION, Location.RED_ROOM,
+		Room greenRoom = new Room("Green Room", StringList.DESCGREENROOM, Location.GREEN_ROOM, Location.NULL_LOCATION, Location.RED_ROOM,
 			Location.WHITE_ROOM, Location.BLUE_ROOM, Location.NULL_LOCATION, Location.NULL_LOCATION);
 
-		Room blackRoom = new Room("Black Room", "This is a black room.", Location.BLACK_ROOM, Location.RED_ROOM, Location.NULL_LOCATION,
+		Room blackRoom = new Room("Black Room", StringList.DESCBLACKROOM, Location.BLACK_ROOM, Location.RED_ROOM, Location.NULL_LOCATION,
 			Location.WHITE_ROOM, Location.BLUE_ROOM, Location.NULL_LOCATION, Location.NULL_LOCATION);
 
-		Room whiteRoom = new Room("White Room", "This is a white room.", Location.WHITE_ROOM, Location.GREEN_ROOM, Location.BLACK_ROOM,
+		Room whiteRoom = new Room("White Room", StringList.DESCWHITEROOM, Location.WHITE_ROOM, Location.GREEN_ROOM, Location.BLACK_ROOM,
 			Location.NULL_LOCATION, Location.RED_ROOM, Location.NULL_LOCATION, Location.NULL_LOCATION);
 
-		Room blueRoom = new Room("Blue Room", "This is a blue room.", Location.BLUE_ROOM, Location.GREEN_ROOM, Location.BLACK_ROOM,
+		Room blueRoom = new Room("Blue Room", StringList.DESCBLUEROOM, Location.BLUE_ROOM, Location.GREEN_ROOM, Location.BLACK_ROOM,
 			Location.RED_ROOM, Location.NULL_LOCATION, Location.NULL_LOCATION, Location.NULL_LOCATION);
 
 		
@@ -140,6 +138,12 @@ public class Game {
 
 
 		// Create the feature objects
+
+		Feature bell = new Feature("bell", Location.BLACK_ROOM, Feature::RingBell);
+
+
+		featureList.put(bell.name, bell);
+		featureList.put("thingy", bell);
 
 		commandOne.put("north", Action.EXIT_NORTH);
 		commandOne.put("n",     Action.EXIT_NORTH);
@@ -170,13 +174,12 @@ public class Game {
 		commandTwo.put("open", Action.OPEN_CLOSE);
 		commandTwo.put("close", Action.OPEN_CLOSE);
 		commandTwo.put("say", Action.SPEAK);
+		commandTwo.put("ring", Action.ACTIVATE);
 
 
 		// Put the player in the starting location
 		state.setCurrentLocation(initialLocation);
 		worldMap.get(initialLocation).firstVisit = false;
-
-		blackRoom.northExitOpen = false;
 
 		// Beginning text of the game.
 		outputLine();
@@ -192,6 +195,7 @@ public class Game {
 
 		state.setCurrentAction(Action.NULL_ACTION);
 		state.setActionItem(itemList.get("empty"));
+		state.setActionFeature(null);
 		state.setPlayerInput("");
 		state.setAddInputOne("");
 		state.setAddInputTwo("");
@@ -272,11 +276,22 @@ public class Game {
 
 		Action action = state.getCurrentAction();
 		Location curLoc = state.getCurrentLocation();
+		Feature curFeat = state.getActionFeature();
 		Room curRoom = worldMap.get(curLoc);
 
 
 		switch (action)
 		{
+			case ACTIVATE:
+			{
+				if (curFeat == null) return;
+
+				if (curFeat.location == curLoc)
+					curFeat.activate(curFeat.method1);
+				else
+					output("There's no " + curFeat.name + " here.");
+
+			} break;
 			case FAIL_ACTION:
 			{
 				// output("Fail action.");
@@ -419,7 +434,7 @@ public class Game {
 
 			case NULL_ACTION:
 			{
-				output("I don't understand that.");
+				output("What?");
 			} break;
 
 			case VERBOSE:
@@ -449,10 +464,10 @@ public class Game {
 
 	}
 
-	private static void prompt() { System.out.print(">> "); }
-	private static void outputLine() { System.out.println(); }
-	private static void output() { System.out.println(); }
-	private static void output(String s) { System.out.println(s); }
+	protected static void prompt() { System.out.print(">> "); }
+	protected static void outputLine() { System.out.println(); }
+	protected static void output() { System.out.println(); }
+	protected static void output(String s) { System.out.println(s); }
 	private static String getPlayerText()
 	{
 		Scanner scn = new Scanner(System.in);
