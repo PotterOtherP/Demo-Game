@@ -1,3 +1,5 @@
+import java.util.HashMap;
+
 class GameState {
 
 	// All of the data members of the game state should be private.
@@ -18,6 +20,10 @@ class GameState {
 	private Action currentAction;
 	private Item actionItem;
 	private Feature actionFeature;
+
+	public HashMap<Location, Room> worldMap = new HashMap<Location, Room>();
+	public HashMap<String, Item> itemList = new HashMap<String, Item>();
+	public HashMap<String, Feature> featureList = new HashMap<String, Feature>();
 
 
 	// constructor

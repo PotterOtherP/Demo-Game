@@ -1,63 +1,103 @@
 class Room {
-
+	
 	protected final String name;
-	protected final String fullDescription;
-	protected final Location roomID;
-	protected final Location northExit;
-	protected final Location southExit;
-	protected final Location eastExit;
-	protected final Location westExit;
-	protected final Location upExit;
-	protected final Location downExit;
+	protected final String description;
+	protected final Location roomLoc;
 
 	protected boolean firstVisit;
-	protected boolean northExitOpen;
-	protected boolean southExitOpen;
-	protected boolean eastExitOpen;
-	protected boolean westExitOpen;
-	protected boolean upExitOpen;
-	protected boolean downExitOpen;
+
+
+	public Door northExit;
+	public Door southExit;
+	public Door eastExit;
+	public Door westExit;
+
 
 	public Room()
 	{
-		name = "";
-		fullDescription = "";
-		roomID = Location.NULL_LOCATION;
-		northExit = Location.NULL_LOCATION;
-		southExit = Location.NULL_LOCATION;
-		eastExit = Location.NULL_LOCATION;
-		westExit = Location.NULL_LOCATION;
-		upExit = Location.NULL_LOCATION;
-		downExit = Location.NULL_LOCATION;
-		firstVisit = true;
-		this.northExitOpen = true;
-		this.southExitOpen = true;
-		this.eastExitOpen = true;
-		this.westExitOpen = true;
-		this.upExitOpen = true;
-		this.downExitOpen = true;
+		this.name = "";
+		this.description = "";
+		this.roomLoc = null;
+		this.northExit = null;
+		this.southExit = null;
+		this.eastExit = null;
+		this.westExit = null;
+		this.firstVisit = true;
+
 	}
 
-	public Room(String name, String fullDesc, Location id, Location north, Location south, Location east, Location west, Location up, Location down)
+	public Room(String name, String desc, Location loc, Door north, Door south, Door east, Door west)
 	{
 		this.name = name;
-		this.fullDescription = fullDesc;
-		this.roomID = id;
+		this.description = desc;
+		this.roomLoc = loc;
 		this.northExit = north;
 		this.southExit = south;
 		this.eastExit = east;
 		this.westExit = west;
-		this.upExit = up;
-		this.downExit = down;
 		this.firstVisit = true;
-		this.northExitOpen = true;
-		this.southExitOpen = true;
-		this.eastExitOpen = true;
-		this.westExitOpen = true;
-		this.upExitOpen = true;
-		this.downExitOpen = true;
 	}
 
 
-	
+	public boolean exit(GameState state, Action act)
+	{
+		Door d = null;
+		boolean result = false;
+		Location dest = Location.NULL_LOCATION;
+		String failString = StringList.CANTGO;
+
+
+		switch(act)
+		{
+			case EXIT_NORTH:
+			{
+				d = northExit;
+			} break;
+
+			case EXIT_SOUTH:
+			{
+				d = southExit;
+			} break;
+
+			case EXIT_EAST:
+			{
+				d = eastExit;
+			} break;
+
+			case EXIT_WEST:
+			{
+				d = westExit;
+			} break;
+
+			default:
+			{
+
+			} break;
+		}
+
+		if (d == null)
+		{
+			result = false;
+			Game.output(failString);
+		}
+
+		else
+		{
+			if (d.locationA == this.roomLoc)
+			{
+				dest = d.locationB;
+			}
+			else
+			{
+				dest = d.locationA;
+			}
+
+			state.setPreviousLocation(state.getCurrentLocation());
+			state.setCurrentLocation(dest);
+			result = true;
+		}
+
+		return result;
+	}
+
 }

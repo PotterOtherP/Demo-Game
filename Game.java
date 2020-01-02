@@ -58,9 +58,6 @@ public class Game {
 	private static boolean gameover = true;
 	private static boolean godmode = false;
 
-	private static HashMap<Location, Room> worldMap = new HashMap<Location, Room>();
-	private static HashMap<String, Item> itemList = new HashMap<String, Item>();
-	private static HashMap<String, Feature> featureList = new HashMap<String, Feature>();
 	private static HashMap<String, Action> commandOne = new HashMap<String, Action>();
 	private static HashMap<String, Action> commandTwo = new HashMap<String, Action>();
 	private static HashMap<String, Action> commandThree = new HashMap<String, Action>();
@@ -98,52 +95,7 @@ public class Game {
 
 
 	private static void initGame(GameState state)
-	{		
-		// Create the world map
-
-		Room redRoom = new Room("Red Room", StringList.DESCREDROOM, Location.RED_ROOM, Location.GREEN_ROOM, Location.BLACK_ROOM,
-			Location.WHITE_ROOM, Location.BLUE_ROOM, Location.NULL_LOCATION, Location.NULL_LOCATION);
-
-		Room greenRoom = new Room("Green Room", StringList.DESCGREENROOM, Location.GREEN_ROOM, Location.NULL_LOCATION, Location.RED_ROOM,
-			Location.WHITE_ROOM, Location.BLUE_ROOM, Location.NULL_LOCATION, Location.NULL_LOCATION);
-
-		Room blackRoom = new Room("Black Room", StringList.DESCBLACKROOM, Location.BLACK_ROOM, Location.RED_ROOM, Location.NULL_LOCATION,
-			Location.WHITE_ROOM, Location.BLUE_ROOM, Location.NULL_LOCATION, Location.NULL_LOCATION);
-
-		Room whiteRoom = new Room("White Room", StringList.DESCWHITEROOM, Location.WHITE_ROOM, Location.GREEN_ROOM, Location.BLACK_ROOM,
-			Location.NULL_LOCATION, Location.RED_ROOM, Location.NULL_LOCATION, Location.NULL_LOCATION);
-
-		Room blueRoom = new Room("Blue Room", StringList.DESCBLUEROOM, Location.BLUE_ROOM, Location.GREEN_ROOM, Location.BLACK_ROOM,
-			Location.RED_ROOM, Location.NULL_LOCATION, Location.NULL_LOCATION, Location.NULL_LOCATION);
-
-		
-
-		worldMap.put(Location.RED_ROOM, redRoom);
-		worldMap.put(Location.GREEN_ROOM, greenRoom);
-		worldMap.put(Location.BLACK_ROOM, blackRoom);
-		worldMap.put(Location.WHITE_ROOM, whiteRoom);
-		worldMap.put(Location.BLUE_ROOM, blueRoom);
-
-
-		// Create the item objects
-		Item emptyItem = new Item("none", Location.NULL_LOCATION);
-		Item itemRope = new Item("rope", Location.GREEN_ROOM);
-		Item itemEgg = new Item("egg", Location.BLUE_ROOM);
-
-		itemList.put("rope", itemRope);
-		itemList.put("egg", itemEgg);
-		itemList.put("empty", emptyItem);
-
-		fakeItems.add("juniper");
-
-
-		// Create the feature objects
-
-		Feature bell = new Feature("bell", Location.BLACK_ROOM, Feature::RingBell);
-
-
-		featureList.put(bell.name, bell);
-		featureList.put("thingy", bell);
+	{	
 
 		commandOne.put("north", Action.EXIT_NORTH);
 		commandOne.put("n",     Action.EXIT_NORTH);
@@ -177,9 +129,58 @@ public class Game {
 		commandTwo.put("ring", Action.ACTIVATE);
 
 
+		// Create the item objects
+		Item emptyItem = new Item("none", Location.NULL_LOCATION);
+		Item itemRope = new Item("rope", Location.GREEN_ROOM);
+		Item itemEgg = new Item("egg", Location.BLUE_ROOM);
+
+		state.itemList.put("rope", itemRope);
+		state.itemList.put("egg", itemEgg);
+		state.itemList.put("empty", emptyItem);
+
+		fakeItems.add("juniper");
+
+
+
+		// Create the world map
+
+
+		Door redGreenDoor = new Door(Location.RED_ROOM, Location.GREEN_ROOM, itemEgg);
+		Door redBlackDoor = new Door(Location.RED_ROOM, Location.BLACK_ROOM, itemEgg);
+		Door redBlueDoor = new Door(Location.RED_ROOM, Location.BLUE_ROOM, itemEgg);
+		Door redWhiteDoor = new Door(Location.RED_ROOM, Location.WHITE_ROOM, itemEgg);
+		Door blueGreenDoor = new Door(Location.BLUE_ROOM, Location.GREEN_ROOM, itemEgg);
+		Door blueBlackDoor = new Door(Location.BLUE_ROOM, Location.BLACK_ROOM, itemEgg);
+		Door whiteGreenDoor = new Door(Location.WHITE_ROOM, Location.GREEN_ROOM, itemEgg);
+		Door whiteBlackDoor = new Door(Location.WHITE_ROOM, Location.BLACK_ROOM, itemEgg);
+
+
+		Room redRoom = new Room("Red Room", StringList.DESCREDROOM, Location.RED_ROOM, redGreenDoor, redBlackDoor, redWhiteDoor, redBlueDoor);
+		Room greenRoom = new Room("Green Room", StringList.DESCGREENROOM, Location.GREEN_ROOM, null, redGreenDoor, whiteGreenDoor, blueGreenDoor);
+		Room blackRoom = new Room("Black Room", StringList.DESCBLACKROOM, Location.BLACK_ROOM, redBlackDoor, null, whiteBlackDoor, blueBlackDoor);
+		Room whiteRoom = new Room("White Room", StringList.DESCWHITEROOM, Location.WHITE_ROOM, whiteGreenDoor, whiteBlackDoor, null, redWhiteDoor);
+		Room blueRoom = new Room("Blue Room", StringList.DESCBLUEROOM, Location.BLUE_ROOM, blueGreenDoor, blueBlackDoor, redBlueDoor, null);
+
+		state.worldMap.put(Location.RED_ROOM, redRoom);
+		state.worldMap.put(Location.GREEN_ROOM, greenRoom);
+		state.worldMap.put(Location.BLACK_ROOM, blackRoom);
+		state.worldMap.put(Location.WHITE_ROOM, whiteRoom);
+		state.worldMap.put(Location.BLUE_ROOM, blueRoom);
+
+		// Create the feature objects
+
+		Feature bell = new Feature("bell", Location.BLACK_ROOM, Feature::RingBell);
+
+
+		state.featureList.put(bell.name, bell);
+		state.featureList.put("thingy", bell);
+
+
+
+
 		// Put the player in the starting location
 		state.setCurrentLocation(initialLocation);
-		worldMap.get(initialLocation).firstVisit = false;
+		state.worldMap.get(initialLocation).firstVisit = false;
 
 		// Beginning text of the game.
 		outputLine();
@@ -194,7 +195,7 @@ public class Game {
 
 
 		state.setCurrentAction(Action.NULL_ACTION);
-		state.setActionItem(itemList.get("empty"));
+		state.setActionItem(state.itemList.get("empty"));
 		state.setActionFeature(null);
 		state.setPlayerInput("");
 		state.setAddInputOne("");
@@ -229,8 +230,8 @@ public class Game {
 				second = inputWords[1];
 
 				if (commandTwo.containsKey(first)) { state.setCurrentAction(commandTwo.get(first)); }
-				if (itemList.containsKey(second)) { state.setActionItem(itemList.get(second)); }
-				if (featureList.containsKey(second)) { state.setActionFeature(featureList.get(second)); }
+				if (state.itemList.containsKey(second)) { state.setActionItem(state.itemList.get(second)); }
+				if (state.featureList.containsKey(second)) { state.setActionFeature(state.featureList.get(second)); }
 
 			} break;
 
@@ -242,8 +243,8 @@ public class Game {
 				third =  inputWords[2];
 
 				if (commandThree.containsKey(first)) { state.setCurrentAction(commandThree.get(first)); }
-				if (featureList.containsKey(second)) { state.setActionFeature(featureList.get(second)); }
-				if (itemList.containsKey(third)) { state.setActionItem(itemList.get(third)); }
+				if (state.featureList.containsKey(second)) { state.setActionFeature(state.featureList.get(second)); }
+				if (state.itemList.containsKey(third)) { state.setActionItem(state.itemList.get(third)); }
 
 			} break;
 
@@ -277,7 +278,7 @@ public class Game {
 		Action action = state.getCurrentAction();
 		Location curLoc = state.getCurrentLocation();
 		Feature curFeat = state.getActionFeature();
-		Room curRoom = worldMap.get(curLoc);
+		Room curRoom = state.worldMap.get(curLoc);
 
 
 		switch (action)
@@ -310,9 +311,9 @@ public class Game {
 
 			case LOOK:
 			{
-				output(curRoom.fullDescription);
+				output(curRoom.description);
 
-				for (Item i : itemList.values())
+				for (Item i : state.itemList.values())
 				{
 					if (i.getLocation() == curLoc)
 					{
@@ -362,7 +363,7 @@ public class Game {
 			case INVENTORY:
 			{
 				output("You are carrying: \n");
-				for (Item i : itemList.values())
+				for (Item i : state.itemList.values())
 				{
 					if (i.getLocation() == Location.PLAYER_INVENTORY)
 						output(i.name);
@@ -381,35 +382,17 @@ public class Game {
 			case EXIT_UP:
 			case EXIT_DOWN:
 			{
-				Location dest = Location.NULL_LOCATION;
-				switch (action)
+				boolean exited = curRoom.exit(state, action);
+
+				if (exited)
 				{
-					case EXIT_NORTH: { if (curRoom.northExitOpen)  dest = curRoom.northExit; } break;
-					case EXIT_SOUTH: { if (curRoom.southExitOpen)  dest = curRoom.southExit; } break;
-					case EXIT_EAST:  { if (curRoom.eastExitOpen)   dest = curRoom.eastExit;  } break;
-					case EXIT_WEST:  { if (curRoom.westExitOpen)   dest = curRoom.westExit;  } break;
-					case EXIT_UP:    { if (curRoom.upExitOpen)     dest = curRoom.upExit;    } break;
-					case EXIT_DOWN:  { if (curRoom.downExitOpen)   dest = curRoom.downExit;  } break;
-					default: {} break;
-
-				}
-
-				if (dest == Location.NULL_LOCATION) output("You can't go that way.");
-				else
-				{
-					state.setPreviousLocation(curLoc);
-					state.setCurrentLocation(dest);
-
-					curLoc = dest;
-					curRoom = worldMap.get(curLoc);
-
+					curRoom = state.worldMap.get(state.getCurrentLocation());
 					output(curRoom.name);
 					outputLine();
 					if (curRoom.firstVisit)
 					{
-						output(curRoom.fullDescription);
 						curRoom.firstVisit = false;
-						outputLine();
+						output(curRoom.description);
 					}
 				}
 

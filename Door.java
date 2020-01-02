@@ -16,10 +16,10 @@ class Door {
 		this.keyItem = null;
 	}
 
-	public Door(boolean locked, boolean open, Location locA, Location locB, Item it)
+	public Door(Location locA, Location locB, Item it)
 	{
-		this.locked = locked;
-		this.open = open;
+		this.locked = false;
+		this.open = true;
 		this.locationA = locA;
 		this.locationB = locB;
 		this.keyItem = it;
@@ -27,14 +27,12 @@ class Door {
 
 	public void lock()
 	{
-
-		locked = true;
-
+		this.locked = true;
 	}
 
 	public void unlock()
 	{
-		locked = false;
+		this.locked = false;
 	}
 
 	public boolean isLocked()

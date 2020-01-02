@@ -7,6 +7,8 @@ class StringList {
 	public static final String DESCBLUEROOM = "This is a blue room. There are exits to the north, south, and east.";
 	public static final String DESCWHITEROOM = "This is a white room. There are exits to the north, south, and west.";
 
+	public static final String CANTGO = "You can't go that way.";
+
 
 
 }
