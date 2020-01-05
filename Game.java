@@ -42,7 +42,12 @@ enum Action {
 	DROP,
 	SPEAK,
 	ACTIVATE,
-	OPEN_CLOSE,
+	RING,
+	PLAY,
+	OPEN,
+	CLOSE,
+	UNLOCK,
+	LOCK,
 
 	ATTACK
 
@@ -51,7 +56,7 @@ enum Action {
 
 
 
-public class Game {
+public final class Game {
 
 
 
@@ -123,20 +128,24 @@ public class Game {
 
 		commandTwo.put("take", Action.TAKE);
 		commandTwo.put("drop", Action.DROP);
-		commandTwo.put("open", Action.OPEN_CLOSE);
-		commandTwo.put("close", Action.OPEN_CLOSE);
+		commandTwo.put("open", Action.OPEN);
+		commandTwo.put("close", Action.CLOSE);
 		commandTwo.put("say", Action.SPEAK);
-		commandTwo.put("ring", Action.ACTIVATE);
+		commandTwo.put("ring", Action.RING);
+		commandTwo.put("play", Action.PLAY);
+
+		commandThree.put("open", Action.OPEN);
+		commandThree.put("unlock", Action.UNLOCK);
 
 
 		// Create the item objects
-		Item emptyItem = new Item("none", Location.NULL_LOCATION);
+		Item nullItem = new Item();
 		Item itemRope = new Item("rope", Location.GREEN_ROOM);
 		Item itemEgg = new Item("egg", Location.BLUE_ROOM);
 
-		state.itemList.put("rope", itemRope);
-		state.itemList.put("egg", itemEgg);
-		state.itemList.put("empty", emptyItem);
+		state.itemList.put(itemRope.name, itemRope);
+		state.itemList.put(itemEgg.name, itemEgg);
+		state.itemList.put(nullItem.name, nullItem);
 
 		fakeItems.add("juniper");
 
@@ -144,22 +153,28 @@ public class Game {
 
 		// Create the world map
 
+		// name, location A, location B, key item
+		Door nullDoor = new Door();
+		Door redGreenDoor = new Door("passage", Location.RED_ROOM, Location.GREEN_ROOM, itemEgg);
+		Door redBlackDoor = new Door("door", Location.RED_ROOM, Location.BLACK_ROOM, itemEgg);
+		Door redBlueDoor = new Door("passage", Location.RED_ROOM, Location.BLUE_ROOM, itemEgg);
+		Door redWhiteDoor = new Door("passage", Location.RED_ROOM, Location.WHITE_ROOM, itemEgg);
+		Door blueGreenDoor = new Door("passage", Location.BLUE_ROOM, Location.GREEN_ROOM, itemEgg);
+		Door blueBlackDoor = new Door("passage", Location.BLUE_ROOM, Location.BLACK_ROOM, itemEgg);
+		Door whiteGreenDoor = new Door("passage", Location.WHITE_ROOM, Location.GREEN_ROOM, itemEgg);
+		Door whiteBlackDoor = new Door("passage", Location.WHITE_ROOM, Location.BLACK_ROOM, itemEgg);
 
-		Door redGreenDoor = new Door(Location.RED_ROOM, Location.GREEN_ROOM, itemEgg);
-		Door redBlackDoor = new Door(Location.RED_ROOM, Location.BLACK_ROOM, itemEgg);
-		Door redBlueDoor = new Door(Location.RED_ROOM, Location.BLUE_ROOM, itemEgg);
-		Door redWhiteDoor = new Door(Location.RED_ROOM, Location.WHITE_ROOM, itemEgg);
-		Door blueGreenDoor = new Door(Location.BLUE_ROOM, Location.GREEN_ROOM, itemEgg);
-		Door blueBlackDoor = new Door(Location.BLUE_ROOM, Location.BLACK_ROOM, itemEgg);
-		Door whiteGreenDoor = new Door(Location.WHITE_ROOM, Location.GREEN_ROOM, itemEgg);
-		Door whiteBlackDoor = new Door(Location.WHITE_ROOM, Location.BLACK_ROOM, itemEgg);
+
+		redBlackDoor.close();
+		redBlackDoor.lock();
 
 
+		// Name, description, ID, North, South, East, West, Up, Down
 		Room redRoom = new Room("Red Room", StringList.DESCREDROOM, Location.RED_ROOM, redGreenDoor, redBlackDoor, redWhiteDoor, redBlueDoor);
-		Room greenRoom = new Room("Green Room", StringList.DESCGREENROOM, Location.GREEN_ROOM, null, redGreenDoor, whiteGreenDoor, blueGreenDoor);
-		Room blackRoom = new Room("Black Room", StringList.DESCBLACKROOM, Location.BLACK_ROOM, redBlackDoor, null, whiteBlackDoor, blueBlackDoor);
-		Room whiteRoom = new Room("White Room", StringList.DESCWHITEROOM, Location.WHITE_ROOM, whiteGreenDoor, whiteBlackDoor, null, redWhiteDoor);
-		Room blueRoom = new Room("Blue Room", StringList.DESCBLUEROOM, Location.BLUE_ROOM, blueGreenDoor, blueBlackDoor, redBlueDoor, null);
+		Room greenRoom = new Room("Green Room", StringList.DESCGREENROOM, Location.GREEN_ROOM, nullDoor, redGreenDoor, whiteGreenDoor, blueGreenDoor);
+		Room blackRoom = new Room("Black Room", StringList.DESCBLACKROOM, Location.BLACK_ROOM, redBlackDoor, nullDoor, whiteBlackDoor, blueBlackDoor);
+		Room whiteRoom = new Room("White Room", StringList.DESCWHITEROOM, Location.WHITE_ROOM, whiteGreenDoor, whiteBlackDoor, nullDoor, redWhiteDoor);
+		Room blueRoom = new Room("Blue Room", StringList.DESCBLUEROOM, Location.BLUE_ROOM, blueGreenDoor, blueBlackDoor, redBlueDoor, nullDoor);
 
 		state.worldMap.put(Location.RED_ROOM, redRoom);
 		state.worldMap.put(Location.GREEN_ROOM, greenRoom);
@@ -169,11 +184,13 @@ public class Game {
 
 		// Create the feature objects
 
-		Feature bell = new Feature("bell", Location.BLACK_ROOM, Feature::RingBell);
+		Feature nullFeature = new Feature();
+		Feature bell = new Feature("bell", Location.BLACK_ROOM, Feature::ringBell, Action.RING);
+		Feature piano = new Feature("piano", Location.WHITE_ROOM, Feature::playPiano, Action.PLAY);
 
-
+		state.featureList.put(nullFeature.name, nullFeature);
 		state.featureList.put(bell.name, bell);
-		state.featureList.put("thingy", bell);
+		state.featureList.put(piano.name, piano);
 
 
 
@@ -195,22 +212,26 @@ public class Game {
 
 
 		state.setCurrentAction(Action.NULL_ACTION);
-		state.setActionItem(state.itemList.get("empty"));
-		state.setActionFeature(null);
+		state.setActionItem(state.itemList.get("null"));
+		state.setActionFeature(state.featureList.get("null"));
 		state.setPlayerInput("");
 		state.setAddInputOne("");
 		state.setAddInputTwo("");
 
-		String playerText = getPlayerText();
-		state.setPlayerInput(playerText);
-		String inputWords[] = playerText.split(" ");
+
+		state.setPlayerInput(getPlayerText());
 
 		String first = "";
 		String second = "";
 		String third = "";
 		String fourth = "";
 
-		switch(inputWords.length)
+		try { first = state.inputWords[0]; } catch (Exception e) {}
+		try { second = state.inputWords[1]; } catch (Exception e) {}
+		try { third = state.inputWords[2]; } catch (Exception e) {}
+		try { fourth = state.inputWords[3]; } catch (Exception e) {}
+
+		switch(state.inputWords.length)
 		{
 			case 0:
 			{
@@ -219,15 +240,13 @@ public class Game {
 
 			case 1:
 			{
-				first = inputWords[0];
 				if (commandOne.containsKey(first)) { state.setCurrentAction(commandOne.get(first)); }
 
 			} break;
 
 			case 2:
 			{
-				first = inputWords[0];
-				second = inputWords[1];
+				
 
 				if (commandTwo.containsKey(first)) { state.setCurrentAction(commandTwo.get(first)); }
 				if (state.itemList.containsKey(second)) { state.setActionItem(state.itemList.get(second)); }
@@ -238,9 +257,7 @@ public class Game {
 
 			case 3:
 			{
-				first = inputWords[0];
-				second = inputWords[1];
-				third =  inputWords[2];
+				
 
 				if (commandThree.containsKey(first)) { state.setCurrentAction(commandThree.get(first)); }
 				if (state.featureList.containsKey(second)) { state.setActionFeature(state.featureList.get(second)); }
@@ -275,39 +292,28 @@ public class Game {
 	private static void updateGame(GameState state)
 	{
 
-		Action action = state.getCurrentAction();
+		Action curAction = state.getCurrentAction();
 		Location curLoc = state.getCurrentLocation();
 		Feature curFeat = state.getActionFeature();
+		Item curItem = state.getActionItem();
 		Room curRoom = state.worldMap.get(curLoc);
 
 
-		switch (action)
+		switch (curAction)
 		{
 			case ACTIVATE:
+			case RING:
+			case PLAY:
 			{
-				if (curFeat == null) return;
+				if (curFeat.name.equals("null")) return;
 
 				if (curFeat.location == curLoc)
-					curFeat.activate(curFeat.method1);
+					curFeat.activate(curFeat.method1, curAction);
 				else
 					output("There's no " + curFeat.name + " here.");
 
 			} break;
-			case FAIL_ACTION:
-			{
-				// output("Fail action.");
-			} break;
-
-			case JUMP:
-			{
-				output("Wheeeeeeee!");
-
-			} break;
-
-			case SHOUT:
-			{
-				output("Yaaaaarrrrggghhh!");
-			} break;
+			
 
 			case LOOK:
 			{
@@ -332,7 +338,7 @@ public class Game {
 					item.setLocation(Location.PLAYER_INVENTORY);
 					output("You picked up the " + item.name + ".");
 				}
-				else if (item.name == "none")
+				else if (item.name.equals("null"))
 				{
 
 				}
@@ -350,7 +356,7 @@ public class Game {
 					item.setLocation(curLoc);
 					output("You dropped the " + item.name + ".");
 				}
-				else if (item.name == "none")
+				else if (item.name.equals("null"))
 				{
 
 				}
@@ -370,10 +376,20 @@ public class Game {
 				}
 			} break;
 
-			case QUIT:
+			case OPEN:
 			{
-				gameover = true;
+				String word = "door";
+				for (Door d : curRoom.exits)
+				{
+					if (d.name.equals(word))
+					{
+						d.unlock(curItem);
+						d.open();
+						
+					}
+				}
 			} break;
+
 
 			case EXIT_NORTH:
 			case EXIT_SOUTH:
@@ -382,7 +398,7 @@ public class Game {
 			case EXIT_UP:
 			case EXIT_DOWN:
 			{
-				boolean exited = curRoom.exit(state, action);
+				boolean exited = curRoom.exit(state, curAction);
 
 				if (exited)
 				{
@@ -399,41 +415,24 @@ public class Game {
 			} break;
 
 
+			// Simple actions
+
+			case FAIL_ACTION: { /* output("Fail action."); */ } break;
+			case JUMP: { output("Wheeeeeeee!"); } break;
+			case SHOUT: { output("Yaaaaarrrrggghhh!"); } break;
 			case GODMODE_TOGGLE:
 			{
-				if (!godmode)
-				{
-					godmode = true;
-					output("God mode enabled.");
-				}
-
-				else if (godmode)
-				{
-					godmode = false;
-					output("God mode disabled.");
-
-				}
+				if (!godmode) { godmode = true; output("God mode enabled."); }
+				else if (godmode) { godmode = false; output("God mode disabled."); }
 			} break;
 
-			case NULL_ACTION:
-			{
-				output("What?");
-			} break;
+			case NULL_ACTION: { output("What?"); } break;
+			case VERBOSE: { output("You said too many words."); } break;
+			case PROFANITY: { output("There's no need for that kind of language."); } break;
+			
+			case QUIT: { /* if (verifyQuit()) */ gameover = true; } break;
 
-			case VERBOSE:
-			{
-				output("You said too many words.");
-			} break;
-
-			case PROFANITY:
-			{
-				output("There's no need for that kind of language.");
-			} break;
-
-			default:
-			{
-
-			} break;
+			default: {} break;
 		}
 
 
@@ -470,6 +469,18 @@ public class Game {
 
 
 		return result.toLowerCase();
+	}
+
+	protected static boolean verifyQuit()
+	{
+		boolean result = false;
+		Scanner scn = new Scanner(System.in);
+		output("Are you sure you want to quit?");
+		String input = scn.nextLine().toLowerCase();
+		if (input.equals("y")) result = true;
+		if (input.equals("yes")) result = true;
+
+		return result;
 	}
 
 

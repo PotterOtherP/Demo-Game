@@ -15,9 +15,12 @@ class GameState {
 
 	// player action
 	private String playerInput;
+	protected String[] inputWords;
 	private String addInputOne;
-	private String addInputTwo;	
+	private String addInputTwo;
+
 	private Action currentAction;
+	private String actionObjectName;
 	private Item actionItem;
 	private Feature actionFeature;
 
@@ -51,7 +54,12 @@ class GameState {
 	public void setCurrentAction(Action act) { currentAction = act; }
 	public Action getCurrentAction() { return currentAction; }
 
-	public void setPlayerInput(String str) { playerInput = str; }
+	public void setPlayerInput(String str)
+	{ 
+		playerInput = str;
+		inputWords = str.split(" ");
+
+	}
 	public String getPlayerInput() { return playerInput; }
 
 	public void setAddInputOne(String str) { addInputOne = str; }

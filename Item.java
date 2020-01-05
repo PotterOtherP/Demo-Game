@@ -8,7 +8,7 @@ class Item {
 
 	public Item()
 	{
-		this.name = "";
+		this.name = "null";
 		this.location = Location.NULL_LOCATION;
 
 	}
