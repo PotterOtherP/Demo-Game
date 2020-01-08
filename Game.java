@@ -16,8 +16,16 @@ enum Location {
 
 	}
 
-enum Action {
+enum ActionType {
 
+	BLANK,
+	REFLEXIVE,
+	DIRECT,
+	INDIRECT
+
+}
+
+enum Action {
 
 	JUMP,
 	SHOUT,
@@ -37,6 +45,7 @@ enum Action {
 	VERBOSE,
 	PROFANITY,
 	WAIT,
+	DEFEND,
 
 	TAKE,
 	DROP,
@@ -85,12 +94,10 @@ public final class Game {
 
 		while (!gameover)
 		{	
-
-			getPlayerAction(gameState);
-			if (validateAction(gameState))
-			{
-				updateGame(gameState);
-			}
+			gameState.resetInput();
+			gameState.setPlayerInput(getPlayerText());
+			parsePlayerInput(gameState);
+			updateGame(gameState);
 		}
 
 
@@ -194,6 +201,10 @@ public final class Game {
 
 
 
+		Actor troll = new Actor(Location.BLACK_ROOM, "troll");
+		state.actorList.put(troll.name, troll);
+
+
 
 		// Put the player in the starting location
 		state.setCurrentLocation(initialLocation);
@@ -205,42 +216,71 @@ public final class Game {
 		
 	}
 
-
-	private static void getPlayerAction(GameState state)
+	private static void altParse(GameState state)
 	{
-		
+		String first = state.first;
+		String second = state.second;
+		String third = state.third;
+		String fourth = state.fourth;
+		String fifth = state.fifth;
+		String sixth = state.sixth;
+		String seventh = state.seventh;
+		String eighth = state.eighth;
+		String ninth = state.ninth;
+		String tenth = state.tenth;
 
 
-		state.setCurrentAction(Action.NULL_ACTION);
-		state.setActionItem(state.itemList.get("null"));
-		state.setActionFeature(state.featureList.get("null"));
-		state.setPlayerInput("");
-		state.setAddInputOne("");
-		state.setAddInputTwo("");
 
 
-		state.setPlayerInput(getPlayerText());
+	}
 
-		String first = "";
-		String second = "";
-		String third = "";
-		String fourth = "";
 
-		try { first = state.inputWords[0]; } catch (Exception e) {}
-		try { second = state.inputWords[1]; } catch (Exception e) {}
-		try { third = state.inputWords[2]; } catch (Exception e) {}
-		try { fourth = state.inputWords[3]; } catch (Exception e) {}
+	private static void parsePlayerInput(GameState state)
+	{
 
-		switch(state.inputWords.length)
+		/* What is the player trying to do?
+
+		   A reflexive action? One word. Is it a valid action?
+
+		   A direct action? An action word and an object (feature, item, door, actor. phrase). Is the object valid?
+
+		   An indirect action? An action word, a direct object, and an indirect object. Are they all valid?
+
+		*/
+
+		String first = state.first;
+		String second = state.second;
+		String third = state.third;
+		String fourth = state.fourth;
+		String fifth = state.fifth;
+		String sixth = state.sixth;
+		String seventh = state.seventh;
+		String eighth = state.eighth;
+		String ninth = state.ninth;
+		String tenth = state.tenth;
+
+
+		switch(state.numInputWords)
 		{
-			case 0:
-			{
-				state.setCurrentAction(Action.NULL_ACTION);
-			} break;
 
 			case 1:
 			{
-				if (commandOne.containsKey(first)) { state.setCurrentAction(commandOne.get(first)); }
+				if (commandOne.containsKey(first))
+				{ 
+					state.setCurrentAction(commandOne.get(first));
+				}
+
+				else if (commandTwo.containsKey(first) || commandThree.containsKey(first))
+				{
+					output("What do you want to " + first + "?");
+					state.second = getPlayerText();
+					parsePlayerInput(state);
+				}
+				else
+				{
+					state.setCurrentAction(Action.FAIL_ACTION);
+				}
+
 
 			} break;
 
@@ -248,9 +288,9 @@ public final class Game {
 			{
 				
 
-				if (commandTwo.containsKey(first)) { state.setCurrentAction(commandTwo.get(first)); }
-				if (state.itemList.containsKey(second)) { state.setActionItem(state.itemList.get(second)); }
-				if (state.featureList.containsKey(second)) { state.setActionFeature(state.featureList.get(second)); }
+				if (commandTwo.containsKey(state.first)) { state.setCurrentAction(commandTwo.get(state.first)); }
+				if (state.itemList.containsKey(state.second)) { state.setActionItem(state.itemList.get(state.second)); }
+				if (state.featureList.containsKey(state.second)) { state.setActionFeature(state.featureList.get(state.second)); }
 
 			} break;
 
@@ -259,9 +299,9 @@ public final class Game {
 			{
 				
 
-				if (commandThree.containsKey(first)) { state.setCurrentAction(commandThree.get(first)); }
-				if (state.featureList.containsKey(second)) { state.setActionFeature(state.featureList.get(second)); }
-				if (state.itemList.containsKey(third)) { state.setActionItem(state.itemList.get(third)); }
+				if (commandThree.containsKey(state.first)) { state.setCurrentAction(commandThree.get(state.first)); }
+				if (state.featureList.containsKey(state.second)) { state.setActionFeature(state.featureList.get(state.second)); }
+				if (state.itemList.containsKey(state.third)) { state.setActionItem(state.itemList.get(state.third)); }
 
 			} break;
 
@@ -278,29 +318,28 @@ public final class Game {
 	}
 
 
-	private static boolean validateAction(GameState state)
-	{
-		boolean result = true;
-
-
-
-
-		return result;
-	}
-
-
 	private static void updateGame(GameState state)
 	{
+		/*
+			Where are we right now?
+			What is the player trying to do?
+			If the player is using an object, is that object present?
 
-		Action curAction = state.getCurrentAction();
+		*/
+
+
 		Location curLoc = state.getCurrentLocation();
+		Room curRoom = state.worldMap.get(curLoc);
+
+		ActionType curActionType = state.getCurrentActionType();
+		Action curAction = state.getCurrentAction();
 		Feature curFeat = state.getActionFeature();
 		Item curItem = state.getActionItem();
-		Room curRoom = state.worldMap.get(curLoc);
 
 
 		switch (curAction)
 		{
+
 			case ACTIVATE:
 			case RING:
 			case PLAY:
@@ -417,25 +456,26 @@ public final class Game {
 
 			// Simple actions
 
-			case FAIL_ACTION: { /* output("Fail action."); */ } break;
-			case JUMP: { output("Wheeeeeeee!"); } break;
-			case SHOUT: { output("Yaaaaarrrrggghhh!"); } break;
 			case GODMODE_TOGGLE:
 			{
 				if (!godmode) { godmode = true; output("God mode enabled."); }
 				else if (godmode) { godmode = false; output("God mode disabled."); }
 			} break;
 
-			case NULL_ACTION: { output("What?"); } break;
+			case FAIL_ACTION: { output("Fail action."); } break;
+			case JUMP: { output("Wheeeeeeee!"); } break;
+			case SHOUT: { output("Yaaaaarrrrggghhh!"); } break;
+			case NULL_ACTION: { output("Null action detected."); } break;
 			case VERBOSE: { output("You said too many words."); } break;
-			case PROFANITY: { output("There's no need for that kind of language."); } break;
-			
+			case PROFANITY: { output("There's no need for that kind of language."); } break;			
 			case QUIT: { /* if (verifyQuit()) */ gameover = true; } break;
 
 			default: {} break;
 		}
 
 
+		Actor actor = state.actorList.get("troll");
+		actor.move();
 
 		state.addTurn();
 		if (state.getTurns() >=50)

@@ -9,6 +9,7 @@ class StringList {
 
 	public static final String CANTGO = "You can't go that way.";
 
-
+	// This class does not get instantiated.
+	private StringList() {}
 
 }

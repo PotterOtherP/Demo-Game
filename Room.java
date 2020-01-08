@@ -79,7 +79,7 @@ class Room {
 
 
 		// If there's no exit in that direction, print the room's particular message (for that direction.)
-		if (d == null)
+		if (d.name.equals("null"))
 		{
 			result = false;
 			Game.output(failString);
