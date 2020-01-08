@@ -122,6 +122,9 @@ class GameState {
 	public void setActionFeature(Feature ft) { actionFeature = ft; }
 	public Feature getActionFeature() { return actionFeature; }
 
+	public void setActionObjectName(String str) { actionObjectName = str; }
+	public String getActionObjectName() { return actionObjectName; }
+
 	// It should not be possible to alter the number of turns except by adding 1.
 	public void addTurn() { ++turns; }
 	public int getTurns() { return turns; }

@@ -270,11 +270,28 @@ public final class Game {
 					state.setCurrentAction(commandOne.get(first));
 				}
 
-				else if (commandTwo.containsKey(first) || commandThree.containsKey(first))
+				else if (commandTwo.containsKey(first))
 				{
+					state.setCurrentAction(commandTwo.get(first));
+
 					output("What do you want to " + first + "?");
-					state.second = getPlayerText();
-					parsePlayerInput(state);
+					String input = getPlayerText();
+
+					if (state.itemList.containsKey(input))
+					{
+						state.setActionItem(state.itemList.get(input));
+					}
+
+					else if (state.featureList.containsKey(input))
+					{
+						state.setActionFeature(state.featureList.get(input));
+					}
+
+					else
+					{
+						state.setActionObjectName(input);
+					}
+
 				}
 				else
 				{
@@ -290,7 +307,7 @@ public final class Game {
 
 				if (commandTwo.containsKey(state.first)) { state.setCurrentAction(commandTwo.get(state.first)); }
 				if (state.itemList.containsKey(state.second)) { state.setActionItem(state.itemList.get(state.second)); }
-				if (state.featureList.containsKey(state.second)) { state.setActionFeature(state.featureList.get(state.second)); }
+				else if (state.featureList.containsKey(state.second)) { state.setActionFeature(state.featureList.get(state.second)); }
 
 			} break;
 
@@ -299,9 +316,15 @@ public final class Game {
 			{
 				
 
-				if (commandThree.containsKey(state.first)) { state.setCurrentAction(commandThree.get(state.first)); }
-				if (state.featureList.containsKey(state.second)) { state.setActionFeature(state.featureList.get(state.second)); }
-				if (state.itemList.containsKey(state.third)) { state.setActionItem(state.itemList.get(state.third)); }
+				if (commandThree.containsKey(first)) { state.setCurrentAction(commandThree.get(first)); }
+
+				if (state.featureList.containsKey(second)) { state.setActionFeature(state.featureList.get(second)); }
+				else
+				{
+					state.setActionObjectName(second);
+				}
+
+				if (state.itemList.containsKey(third)) { state.setActionItem(state.itemList.get(third)); }
 
 			} break;
 
@@ -417,7 +440,7 @@ public final class Game {
 
 			case OPEN:
 			{
-				String word = "door";
+				String word = state.getActionObjectName();
 				for (Door d : curRoom.exits)
 				{
 					if (d.name.equals(word))
