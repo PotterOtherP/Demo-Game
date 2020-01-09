@@ -27,8 +27,5 @@ class Actor {
 	}
 
 
-	public static void nullMethod() {}
-
-
 
 }

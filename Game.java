@@ -11,6 +11,7 @@ enum Location {
 	BLUE_ROOM,
 	WHITE_ROOM,
 	BLACK_ROOM,
+	MAGIC_ROOM,
 	PLAYER_INVENTORY,
 	NULL_LOCATION
 
@@ -57,6 +58,8 @@ enum Action {
 	CLOSE,
 	UNLOCK,
 	LOCK,
+	READ,
+	KICK,
 
 	ATTACK
 
@@ -137,22 +140,31 @@ public final class Game {
 		commandTwo.put("drop", Action.DROP);
 		commandTwo.put("open", Action.OPEN);
 		commandTwo.put("close", Action.CLOSE);
+		commandTwo.put("lock", Action.LOCK);
 		commandTwo.put("say", Action.SPEAK);
 		commandTwo.put("ring", Action.RING);
 		commandTwo.put("play", Action.PLAY);
+		commandTwo.put("read", Action.READ);
+		commandTwo.put("kick", Action.KICK);
 
 		commandThree.put("open", Action.OPEN);
 		commandThree.put("unlock", Action.UNLOCK);
+		commandThree.put("lock", Action.LOCK);
 
 
 		// Create the item objects
 		Item nullItem = new Item();
 		Item itemRope = new Item("rope", Location.GREEN_ROOM);
 		Item itemEgg = new Item("egg", Location.BLUE_ROOM);
+		Item itemNote = new Item("note", Location.NULL_LOCATION, GameState::readNote, Action.READ);
+		Item itemMagKey = new Item("key", Location.NULL_LOCATION);
 
+		state.itemList.put(nullItem.name, nullItem);
 		state.itemList.put(itemRope.name, itemRope);
 		state.itemList.put(itemEgg.name, itemEgg);
-		state.itemList.put(nullItem.name, nullItem);
+		state.itemList.put(itemNote.name, itemNote);
+		state.itemList.put(itemMagKey.name, itemMagKey);
+
 
 		fakeItems.add("juniper");
 
@@ -170,30 +182,38 @@ public final class Game {
 		Door blueBlackDoor = new Door("passage", Location.BLUE_ROOM, Location.BLACK_ROOM, itemEgg);
 		Door whiteGreenDoor = new Door("passage", Location.WHITE_ROOM, Location.GREEN_ROOM, itemEgg);
 		Door whiteBlackDoor = new Door("passage", Location.WHITE_ROOM, Location.BLACK_ROOM, itemEgg);
+		Door magicDoor = new Door("door", Location.BLACK_ROOM, Location.MAGIC_ROOM, itemMagKey);
 
 
 		redBlackDoor.close();
 		redBlackDoor.lock();
 
+		magicDoor.close();
+		magicDoor.lock();
 
-		// Name, description, ID, North, South, East, West, Up, Down
-		Room redRoom = new Room("Red Room", StringList.DESCREDROOM, Location.RED_ROOM, redGreenDoor, redBlackDoor, redWhiteDoor, redBlueDoor);
-		Room greenRoom = new Room("Green Room", StringList.DESCGREENROOM, Location.GREEN_ROOM, nullDoor, redGreenDoor, whiteGreenDoor, blueGreenDoor);
-		Room blackRoom = new Room("Black Room", StringList.DESCBLACKROOM, Location.BLACK_ROOM, redBlackDoor, nullDoor, whiteBlackDoor, blueBlackDoor);
-		Room whiteRoom = new Room("White Room", StringList.DESCWHITEROOM, Location.WHITE_ROOM, whiteGreenDoor, whiteBlackDoor, nullDoor, redWhiteDoor);
-		Room blueRoom = new Room("Blue Room", StringList.DESCBLUEROOM, Location.BLUE_ROOM, blueGreenDoor, blueBlackDoor, redBlueDoor, nullDoor);
+
+		// Name, description, ID, North, South, East, West
+		Room redRoom = new Room("Red Room", StringList.DESC_RED_ROOM, Location.RED_ROOM, redGreenDoor, redBlackDoor, redWhiteDoor, redBlueDoor);
+		Room greenRoom = new Room("Green Room", StringList.DESC_GREEN_ROOM, Location.GREEN_ROOM, nullDoor, redGreenDoor, whiteGreenDoor, blueGreenDoor);
+		Room blackRoom = new Room("Black Room", StringList.DESC_BLACK_ROOM, Location.BLACK_ROOM, redBlackDoor, nullDoor, whiteBlackDoor, blueBlackDoor);
+		Room whiteRoom = new Room("White Room", StringList.DESC_WHITE_ROOM, Location.WHITE_ROOM, whiteGreenDoor, whiteBlackDoor, nullDoor, redWhiteDoor);
+		Room blueRoom = new Room("Blue Room", StringList.DESC_BLUE_ROOM, Location.BLUE_ROOM, blueGreenDoor, blueBlackDoor, redBlueDoor, nullDoor);
+		Room magicRoom = new Room("Magic Room", StringList.DESC_MAGIC_ROOM, Location.MAGIC_ROOM, magicDoor, nullDoor, nullDoor, nullDoor);
 
 		state.worldMap.put(Location.RED_ROOM, redRoom);
 		state.worldMap.put(Location.GREEN_ROOM, greenRoom);
 		state.worldMap.put(Location.BLACK_ROOM, blackRoom);
 		state.worldMap.put(Location.WHITE_ROOM, whiteRoom);
 		state.worldMap.put(Location.BLUE_ROOM, blueRoom);
+		state.worldMap.put(Location.MAGIC_ROOM, magicRoom);
 
 		// Create the feature objects
 
 		Feature nullFeature = new Feature();
-		Feature bell = new Feature("bell", Location.BLACK_ROOM, Feature::ringBell, Action.RING);
-		Feature piano = new Feature("piano", Location.WHITE_ROOM, Feature::playPiano, Action.PLAY);
+		Feature bell = new Feature("bell", Location.BLACK_ROOM, GameState::ringBell, GameState::kickBell, GameState::nullMethod,
+									Action.RING, Action.KICK, Action.NULL_ACTION);
+		Feature piano = new Feature("piano", Location.WHITE_ROOM, GameState::playPiano, GameState::nullMethod, GameState::nullMethod,
+									Action.PLAY, Action.NULL_ACTION, Action.NULL_ACTION);
 
 		state.featureList.put(nullFeature.name, nullFeature);
 		state.featureList.put(bell.name, bell);
@@ -212,7 +232,7 @@ public final class Game {
 
 		// Beginning text of the game.
 		outputLine();
-		output(StringList.INTRO);
+		output(StringList.GAME_INTRO);
 		
 	}
 
@@ -356,8 +376,10 @@ public final class Game {
 
 		ActionType curActionType = state.getCurrentActionType();
 		Action curAction = state.getCurrentAction();
-		Feature curFeat = state.getActionFeature();
-		Item curItem = state.getActionItem();
+
+		Feature actFeature = state.getActionFeature();
+		Item actItem = state.getActionItem();
+		String actName = state.getActionObjectName();
 
 
 		switch (curAction)
@@ -366,13 +388,15 @@ public final class Game {
 			case ACTIVATE:
 			case RING:
 			case PLAY:
+			case READ:
+			case KICK:
 			{
-				if (curFeat.name.equals("null")) return;
+				if (actFeature.name.equals("null")) return;
 
-				if (curFeat.location == curLoc)
-					curFeat.activate(curFeat.method1, curAction);
+				if (actFeature.location == curLoc)
+					actFeature.activate(actFeature.method1, actFeature.method2, actFeature.method3, curAction);
 				else
-					output("There's no " + curFeat.name + " here.");
+					output("There's no " + actFeature.name + " here.");
 
 			} break;
 			
@@ -440,14 +464,25 @@ public final class Game {
 
 			case OPEN:
 			{
-				String word = state.getActionObjectName();
 				for (Door d : curRoom.exits)
 				{
-					if (d.name.equals(word))
+					if (d.name.equals(actName))
 					{
-						d.unlock(curItem);
+						d.unlock(actItem);
 						d.open();
 						
+					}
+				}
+			} break;
+
+			case LOCK:
+			{
+				for (Door d : curRoom.exits)
+				{
+					if (d.name.equals(actName))
+					{
+						d.lock(actItem);
+						d.close();
 					}
 				}
 			} break;

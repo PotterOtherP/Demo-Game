@@ -64,7 +64,7 @@ class Room {
 		Door d = null;
 		boolean result = false;
 		Location dest = Location.NULL_LOCATION;
-		String failString = StringList.CANTGO;
+		String failString = StringList.CANT_GO;
 
 
 		// Identify which direction the player is trying to go.

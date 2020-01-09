@@ -4,6 +4,7 @@ class GameState {
 
 	// gameplay information
 	private int turns;
+	protected static boolean bellRung;
 
 
 	// player attributes
@@ -42,21 +43,26 @@ class GameState {
 
 
 	// lists of game objects
-	public HashMap<Location, Room> worldMap = new HashMap<Location, Room>();
-	public HashMap<String, Item> itemList = new HashMap<String, Item>();
-	public HashMap<String, Feature> featureList = new HashMap<String, Feature>();
-	public HashMap<String, Actor> actorList = new HashMap<String, Actor>();
+	public static HashMap<Location, Room> worldMap;
+	public static HashMap<String, Item> itemList;
+	public static HashMap<String, Feature> featureList;
+	public static HashMap<String, Actor> actorList;
 
 
 	// constructor
 	public GameState()
 	{
-		this.turns = 0;
-		this.currentLocation = Location.NULL_LOCATION;
-		this.previousLocation = Location.NULL_LOCATION;
 		this.dummyItem = new Item();
 		this.dummyFeature = new Feature();
 		this.resetInput();
+		this.turns = 0;
+		this.currentLocation = Location.NULL_LOCATION;
+		this.previousLocation = Location.NULL_LOCATION;
+		this.bellRung = false;
+		worldMap = new HashMap<Location, Room>();
+		itemList = new HashMap<String, Item>();
+		featureList = new HashMap<String, Feature>();
+		actorList = new HashMap<String, Actor>();
 	}
 
 
@@ -128,5 +134,39 @@ class GameState {
 	// It should not be possible to alter the number of turns except by adding 1.
 	public void addTurn() { ++turns; }
 	public int getTurns() { return turns; }
+
+	// Methods used by unique objects
+
+	public static void nullMethod() {}
+
+	public static void ringBell()
+	{
+
+		Game.output("Ding dong ding dong!");
+
+		if (!bellRung)
+		{
+			bellRung = true;
+			Game.output("A piece of paper falls out of the bell!");
+			itemList.get("note").setLocation(Location.BLACK_ROOM);
+			
+		}
+
+	}
+
+	public static void kickBell()
+	{
+		Game.output("BWOOONG!! Ow!");
+	}
+
+	public static void playPiano()
+	{
+		Game.output("Da-da Da-da Da Da-da-da DUN...");
+	}
+
+	public static void readNote()
+	{
+		Game.output(StringList.NOTE_TEXT);
+	}
 
 }
