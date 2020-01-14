@@ -1,31 +1,29 @@
-class Door {
+class Door extends Feature {
 	
-	private boolean locked;
-	private boolean open;
+	public boolean locked;
+	public boolean open;
 
-	protected final String name;
-	protected final Location locationA;
-	protected final Location locationB;
-	protected final Item keyItem;
+
+	public Location locationA;
+	public Location locationB;
+	public Item keyItem;
 
 	public Door()
 	{
-		this.name = "null";
-		this.locked = false;
-		this.open = true;
-		this.locationA = Location.NULL_LOCATION;
-		this.locationB = Location.NULL_LOCATION;
+		super();
 		this.keyItem = new Item();
+		this.locked = true;
+		this.open = false;
 	}
 
 	public Door(String name, Location locA, Location locB, Item it)
 	{
-		this.name = name;
-		this.locked = false;
-		this.open = true;
+		super(name, locA);
 		this.locationA = locA;
 		this.locationB = locB;
 		this.keyItem = it;
+		this.locked = false;
+		this.open = true;
 	}
 
 	public void lock()
@@ -33,17 +31,22 @@ class Door {
 		this.locked = true;
 	}
 
-	public void lock(Item it)
+	public boolean lock(Item it)
 	{
+		boolean result = false;
+
 		if (it == keyItem)
 		{
 			Game.output("You lock the door with the " + it.name + ".");
 			locked = true;
+			result = true;
 		}
 		else
 		{
 			Game.output("You can't use that to lock the door.");
 		}
+
+		return result;
 	}
 
 	public void unlock()
@@ -51,17 +54,21 @@ class Door {
 		this.locked = false;
 	}
 
-	public void unlock(Item it)
+	public boolean unlock(Item it)
 	{
+		boolean result = false;
 		if (it == keyItem)
 		{
 			Game.output("You unlock the door with the " + it.name + ".");
 			locked = false;
+			result = true;
 		}
 		else
 		{
 			Game.output("You can't use that to unlock the door.");
 		}
+
+		return result;
 	}
 
 	public boolean isLocked()

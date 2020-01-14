@@ -1,20 +1,82 @@
-class Feature extends GameObject{
+class Feature {
+
+	/* A feature is an object that exists in a room. It can have up to three activation methods
+	   with corresponding activation actions.
+
+
+	*/
 	
-	// Objects and features of rooms that can't be moved or added to the player's inventory.
+	public final String name;
+	public FeatureMethod ft;
 
 
+	public Location location;
+
+	public void setLocation(Location loc) { location = loc; }
+	public Location getLocation() { return location; }
+
+
+	// default constructor
 	public Feature()
 	{
-		super();
+		this.name = "null";
+		this.location = Location.NULL_LOCATION;
+		this.ft = (state, act) -> {};
 	}
 
-
-	public Feature(String name, Location loc, Runnable r1, Runnable r2, Runnable r3, Action act1, Action act2, Action act3)
+	// Constructor with no unique methods
+	public Feature(String name, Location loc)
 	{
-		super(name, loc, r1, r2, r3, act1, act2, act3);
+		this.name = name;
+		this.location = loc;
+		this.ft = (state, act) -> {};
 	}
 
-	
+	public Feature(String name, Location loc, FeatureMethod fm)
+	{
+		this.name = name;
+		this.location = loc;
+		this.ft = fm;
+	}
 
+
+	public void activate(GameState state, Action act)
+	{
+		ft.outputMessage(state, act);
+	}
+
+	public boolean vowelStart()
+	{
+		// Exceptions can go here
+		if (false)
+		{
+			return true;
+		}
+
+		boolean result = false;
+
+		String str = this.name.toLowerCase();
+		char c  = str.charAt(0);
+
+		switch(c)
+		{
+			case 'a':
+			case 'e':
+			case 'i':
+			case 'o':
+			case 'u':
+			{
+				result = true;
+			} break;
+
+			default:
+			{
+				result = false;
+			} break;
+		}
+
+		return result;
+	}
 
 }
+

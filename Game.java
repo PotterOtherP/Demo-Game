@@ -65,7 +65,11 @@ enum Action {
 
 	}
 
+interface FeatureMethod {
 
+	public void outputMessage(GameState state, Action act);
+
+}
 
 
 public final class Game {
@@ -78,6 +82,7 @@ public final class Game {
 	private static HashMap<String, Action> commandOne = new HashMap<String, Action>();
 	private static HashMap<String, Action> commandTwo = new HashMap<String, Action>();
 	private static HashMap<String, Action> commandThree = new HashMap<String, Action>();
+	private static HashMap<String, String> actionObjects = new HashMap<String, String>();
 
 	private static ArrayList<String> fakeItems = new ArrayList<String>();
 
@@ -97,9 +102,8 @@ public final class Game {
 
 		while (!gameover)
 		{	
-			gameState.resetInput();
-			gameState.setPlayerInput(getPlayerText());
 			parsePlayerInput(gameState);
+			validateAction(gameState);
 			updateGame(gameState);
 		}
 
@@ -135,6 +139,7 @@ public final class Game {
 		commandOne.put("shit",  Action.PROFANITY);
 		commandOne.put("shout", Action.SHOUT);
 		commandOne.put("yell",  Action.SHOUT);
+		commandOne.put("scream",  Action.SHOUT);
 
 		commandTwo.put("take", Action.TAKE);
 		commandTwo.put("drop", Action.DROP);
@@ -151,28 +156,47 @@ public final class Game {
 		commandThree.put("unlock", Action.UNLOCK);
 		commandThree.put("lock", Action.LOCK);
 
+		FeatureMethod ringBell = (st, act) -> 
+			{ 
+				switch(act)
+				{
+					case RING:
+					{
+						if (!st.bellRung)
+						{
+							output("The bell has not been rung before!");
+							st.bellRung = true;
+						}
+						output("Ding dong ding dong!");
 
-		// Create the item objects
+					} break;
+
+					case KICK:
+					{
+						output("BWWWOOONG!! Ow!");
+					} break;
+
+					default: {} break;
+
+				}
+
+			};
+
+
+		Feature nullFeature = new Feature();
+		Feature bell = new Feature("bell", Location.BLACK_ROOM, ringBell);
+		Feature piano = new Feature("piano", Location.WHITE_ROOM);
+
+
+
 		Item nullItem = new Item();
 		Item itemRope = new Item("rope", Location.GREEN_ROOM);
 		Item itemEgg = new Item("egg", Location.BLUE_ROOM);
-		Item itemNote = new Item("note", Location.NULL_LOCATION, GameState::readNote, Action.READ);
+		Item itemNote = new Item("note", Location.NULL_LOCATION);
 		Item itemMagKey = new Item("key", Location.NULL_LOCATION);
 
-		state.itemList.put(nullItem.name, nullItem);
-		state.itemList.put(itemRope.name, itemRope);
-		state.itemList.put(itemEgg.name, itemEgg);
-		state.itemList.put(itemNote.name, itemNote);
-		state.itemList.put(itemMagKey.name, itemMagKey);
+		Actor troll = new Actor("troll", Location.BLACK_ROOM);
 
-
-		fakeItems.add("juniper");
-
-
-
-		// Create the world map
-
-		// name, location A, location B, key item
 		Door nullDoor = new Door();
 		Door redGreenDoor = new Door("passage", Location.RED_ROOM, Location.GREEN_ROOM, itemEgg);
 		Door redBlackDoor = new Door("door", Location.RED_ROOM, Location.BLACK_ROOM, itemEgg);
@@ -185,17 +209,32 @@ public final class Game {
 		Door magicDoor = new Door("door", Location.BLACK_ROOM, Location.MAGIC_ROOM, itemMagKey);
 
 
-		redBlackDoor.close();
-		redBlackDoor.lock();
+		state.itemList.put(nullItem.name, nullItem);
+		state.itemList.put(itemRope.name, itemRope);
+		state.itemList.put(itemEgg.name, itemEgg);
+		state.itemList.put(itemNote.name, itemNote);
+		state.itemList.put(itemMagKey.name, itemMagKey);
 
-		magicDoor.close();
-		magicDoor.lock();
+		state.featureList.put(nullFeature.name, nullFeature);
+		state.featureList.put(bell.name, bell);
+		state.featureList.put(piano.name, piano);
+	
+		state.actorList.put(troll.name, troll);
+
+		actionObjects.put(itemRope.name, "item");
+		actionObjects.put(itemEgg.name, "item");
+		actionObjects.put(itemNote.name, "item");
+		actionObjects.put(itemMagKey.name, "item");
+		actionObjects.put(bell.name, "feature");
+		actionObjects.put(piano.name, "feature");
+		actionObjects.put(troll.name, "actor");
+		actionObjects.put("door", "door");
 
 
 		// Name, description, ID, North, South, East, West
 		Room redRoom = new Room("Red Room", StringList.DESC_RED_ROOM, Location.RED_ROOM, redGreenDoor, redBlackDoor, redWhiteDoor, redBlueDoor);
 		Room greenRoom = new Room("Green Room", StringList.DESC_GREEN_ROOM, Location.GREEN_ROOM, nullDoor, redGreenDoor, whiteGreenDoor, blueGreenDoor);
-		Room blackRoom = new Room("Black Room", StringList.DESC_BLACK_ROOM, Location.BLACK_ROOM, redBlackDoor, nullDoor, whiteBlackDoor, blueBlackDoor);
+		Room blackRoom = new Room("Black Room", StringList.DESC_BLACK_ROOM, Location.BLACK_ROOM, redBlackDoor, magicDoor, whiteBlackDoor, blueBlackDoor);
 		Room whiteRoom = new Room("White Room", StringList.DESC_WHITE_ROOM, Location.WHITE_ROOM, whiteGreenDoor, whiteBlackDoor, nullDoor, redWhiteDoor);
 		Room blueRoom = new Room("Blue Room", StringList.DESC_BLUE_ROOM, Location.BLUE_ROOM, blueGreenDoor, blueBlackDoor, redBlueDoor, nullDoor);
 		Room magicRoom = new Room("Magic Room", StringList.DESC_MAGIC_ROOM, Location.MAGIC_ROOM, magicDoor, nullDoor, nullDoor, nullDoor);
@@ -207,23 +246,14 @@ public final class Game {
 		state.worldMap.put(Location.BLUE_ROOM, blueRoom);
 		state.worldMap.put(Location.MAGIC_ROOM, magicRoom);
 
-		// Create the feature objects
+		redBlackDoor.close();
+		redBlackDoor.lock();
 
-		Feature nullFeature = new Feature();
-		Feature bell = new Feature("bell", Location.BLACK_ROOM, GameState::ringBell, GameState::kickBell, GameState::nullMethod,
-									Action.RING, Action.KICK, Action.NULL_ACTION);
-		Feature piano = new Feature("piano", Location.WHITE_ROOM, GameState::playPiano, GameState::nullMethod, GameState::nullMethod,
-									Action.PLAY, Action.NULL_ACTION, Action.NULL_ACTION);
-
-		state.featureList.put(nullFeature.name, nullFeature);
-		state.featureList.put(bell.name, bell);
-		state.featureList.put(piano.name, piano);
+		magicDoor.close();
+		magicDoor.lock();
 
 
-
-		Actor troll = new Actor(Location.BLACK_ROOM, "troll");
-		state.actorList.put(troll.name, troll);
-
+		fakeItems.add("juniper");
 
 
 		// Put the player in the starting location
@@ -236,137 +266,131 @@ public final class Game {
 		
 	}
 
-	private static void altParse(GameState state)
+
+
+
+	private static void parsePlayerInput(GameState state)
 	{
-		String first = state.first;
-		String second = state.second;
-		String third = state.third;
-		String fourth = state.fourth;
-		String fifth = state.fifth;
-		String sixth = state.sixth;
-		String seventh = state.seventh;
-		String eighth = state.eighth;
-		String ninth = state.ninth;
-		String tenth = state.tenth;
+
+		/* Takes whatever the player entered and sets three strings in the gamestate:
+		   first (action), second (actionable object), third (item).
+		   Also sets the number of action arguments (non-empty strings).
+
+		*/
+
+		state.resetInput();
+
+		String playerText = getPlayerText();
+		String[] words = playerText.split(" ");
+
+		String arg1 = "";
+		String arg2 = "";
+		String arg3 = "";
+
+		try { arg1 = words[0]; } catch (Exception e) {}
+		try { arg2 = words[1]; } catch (Exception e) {}
+		try { arg3 = words[2]; } catch (Exception e) {}
+
+		state.first = arg1;
+		state.second = arg2;
+		state.third = arg3;
+
+		int numWords = 0;
+
+		if(!arg1.isEmpty())
+			++numWords;
+
+		if (!arg2.isEmpty())
+			++numWords;
+
+		if(!arg3.isEmpty())
+			++numWords;
+
+		state.numInputWords = numWords;
+
+
+
+
+		
 
 
 
 
 	}
 
-
-	private static void parsePlayerInput(GameState state)
+	private static void validateAction(GameState state)
 	{
+		/* Verifies that the action arguments are recognized by the game.
 
-		/* What is the player trying to do?
-
-		   A reflexive action? One word. Is it a valid action?
-
-		   A direct action? An action word and an object (feature, item, door, actor. phrase). Is the object valid?
-
-		   An indirect action? An action word, a direct object, and an indirect object. Are they all valid?
-
+		   Gets more information from the player if the action is incomplete.
 		*/
+
+
 
 		String first = state.first;
 		String second = state.second;
 		String third = state.third;
-		String fourth = state.fourth;
-		String fifth = state.fifth;
-		String sixth = state.sixth;
-		String seventh = state.seventh;
-		String eighth = state.eighth;
-		String ninth = state.ninth;
-		String tenth = state.tenth;
 
+		Action act = Action.NULL_ACTION;
+		if (commandOne.containsKey(first)) { act = commandOne.get(first); }
+		if (commandTwo.containsKey(first)) { act = commandTwo.get(first); }
+		if (commandThree.containsKey(first)) { act = commandThree.get(first); }
+
+		state.currentAction = act;
 
 		switch(state.numInputWords)
 		{
-
 			case 1:
 			{
-				if (commandOne.containsKey(first))
-				{ 
-					state.setCurrentAction(commandOne.get(first));
-				}
-
-				else if (commandTwo.containsKey(first))
-				{
-					state.setCurrentAction(commandTwo.get(first));
-
-					output("What do you want to " + first + "?");
-					String input = getPlayerText();
-
-					if (state.itemList.containsKey(input))
-					{
-						state.setActionItem(state.itemList.get(input));
-					}
-
-					else if (state.featureList.containsKey(input))
-					{
-						state.setActionFeature(state.featureList.get(input));
-					}
-
-					else
-					{
-						state.setActionObjectName(input);
-					}
-
-				}
-				else
-				{
-					state.setCurrentAction(Action.FAIL_ACTION);
-				}
-
 
 			} break;
-
 			case 2:
 			{
-				
+				if (actionObjects.containsKey(second))
+				{
+					if (actionObjects.get(second).equals("feature"))
+					{
+						state.objectFeature = state.featureList.get(second);
+					}
 
-				if (commandTwo.containsKey(state.first)) { state.setCurrentAction(commandTwo.get(state.first)); }
-				if (state.itemList.containsKey(state.second)) { state.setActionItem(state.itemList.get(state.second)); }
-				else if (state.featureList.containsKey(state.second)) { state.setActionFeature(state.featureList.get(state.second)); }
+					if (actionObjects.get(second).equals("item"))
+					{
+						state.objectItem = state.itemList.get(second);
+					}
 
+					if (actionObjects.get(second).equals("actor"))
+					{
+						state.objectActor = state.actorList.get(second);
+					}
+
+					if (actionObjects.get(second).equals("door"))
+					{
+
+					}
+				}
 			} break;
-
-
 			case 3:
 			{
-				
-
-				if (commandThree.containsKey(first)) { state.setCurrentAction(commandThree.get(first)); }
-
-				if (state.featureList.containsKey(second)) { state.setActionFeature(state.featureList.get(second)); }
-				else
+				if (actionObjects.get(third).equals("item"))
 				{
-					state.setActionObjectName(second);
+					state.indirectObject = state.itemList.get(third);
 				}
-
-				if (state.itemList.containsKey(third)) { state.setActionItem(state.itemList.get(third)); }
-
 			} break;
 
 			default:
 			{
-				state.setCurrentAction(Action.NULL_ACTION);
+				// we should never be here
+				output("Illegal number of command argments: " + state.numInputWords);
 			} break;
-
 		}
-
-
-
 
 	}
 
 
 	private static void updateGame(GameState state)
 	{
-		/*
-			Where are we right now?
-			What is the player trying to do?
-			If the player is using an object, is that object present?
+		/*	Executes the player's action on the arguments.
+			
 
 		*/
 
@@ -374,12 +398,22 @@ public final class Game {
 		Location curLoc = state.getCurrentLocation();
 		Room curRoom = state.worldMap.get(curLoc);
 
-		ActionType curActionType = state.getCurrentActionType();
 		Action curAction = state.getCurrentAction();
 
-		Feature actFeature = state.getActionFeature();
-		Item actItem = state.getActionItem();
-		String actName = state.getActionObjectName();
+		Feature objFeature = state.objectFeature;
+		Item objItem = state.objectItem;
+		Actor objActor = state.objectActor;
+
+		Item indItem = state.indirectObject;
+
+		/*
+		output("Selection action is " + curAction);
+		output("Selected feature is " + objFeature.name);
+		output("Selected item is " + objItem.name);
+		output("Selected actor is " + objActor.name);
+		output("Indirect object is " + indItem.name);
+		*/
+
 
 
 		switch (curAction)
@@ -391,12 +425,12 @@ public final class Game {
 			case READ:
 			case KICK:
 			{
-				if (actFeature.name.equals("null")) return;
+				if (objFeature.name.equals("null")) return;
 
-				if (actFeature.location == curLoc)
-					actFeature.activate(actFeature.method1, actFeature.method2, actFeature.method3, curAction);
+				if (objFeature.location == curLoc)
+					objFeature.activate(state, curAction);
 				else
-					output("There's no " + actFeature.name + " here.");
+					output("There's no " + objFeature.name + " here.");
 
 			} break;
 			
@@ -405,12 +439,21 @@ public final class Game {
 			{
 				output(curRoom.description);
 
-				for (Item i : state.itemList.values())
+				for (Feature ft : state.featureList.values())
 				{
-					if (i.getLocation() == curLoc)
+					if (ft.getLocation() == curLoc)
 					{
-						String word = (i.vowelStart()? "an " : "a ");
-						output("There is " + word + i.name + " here.");
+						String word = (ft.vowelStart()? "an " : "a ");
+						output("There is " + word + ft.name + " here.");
+					}
+				}
+
+				for (Item it : state.itemList.values())
+				{
+					if (it.getLocation() == curLoc)
+					{
+						String word = (it.vowelStart()? "an " : "a ");
+						output("There is " + word + it.name + " here.");
 					}
 				}
 
@@ -418,33 +461,24 @@ public final class Game {
 
 			case TAKE:
 			{
-				Item item = state.getActionItem();
-				if (item.getLocation() == curLoc)
+				
+				if (objItem.getLocation() == curLoc)
 				{
-					item.setLocation(Location.PLAYER_INVENTORY);
-					output("You picked up the " + item.name + ".");
-				}
-				else if (item.name.equals("null"))
-				{
-
-				}
+					objItem.setLocation(Location.PLAYER_INVENTORY);
+					output("You picked up the " + objItem.name + ".");
+				}				
 				else
 				{
-					output("There's no " + item.name + " here.");
+					output("There's no " + objItem.name + " here.");
 				}	
 			} break;
 
 			case DROP:
 			{
-				Item item = state.getActionItem();
-				if (item.getLocation() == Location.PLAYER_INVENTORY)
+				if (objItem.getLocation() == Location.PLAYER_INVENTORY)
 				{
-					item.setLocation(curLoc);
-					output("You dropped the " + item.name + ".");
-				}
-				else if (item.name.equals("null"))
-				{
-
+					objItem.setLocation(curLoc);
+					output("You dropped the " + objItem.name + ".");
 				}
 				else
 				{
@@ -455,35 +489,30 @@ public final class Game {
 			case INVENTORY:
 			{
 				output("You are carrying: \n");
-				for (Item i : state.itemList.values())
+				for (Item it : state.itemList.values())
 				{
-					if (i.getLocation() == Location.PLAYER_INVENTORY)
-						output(i.name);
+					if (it.getLocation() == Location.PLAYER_INVENTORY)
+						output(it.name);
 				}
 			} break;
 
 			case OPEN:
+			case UNLOCK:
 			{
 				for (Door d : curRoom.exits)
 				{
-					if (d.name.equals(actName))
-					{
-						d.unlock(actItem);
-						d.open();
-						
-					}
+					d.unlock(indItem);
+					d.open();
 				}
+			
 			} break;
 
 			case LOCK:
 			{
 				for (Door d : curRoom.exits)
 				{
-					if (d.name.equals(actName))
-					{
-						d.lock(actItem);
-						d.close();
-					}
+					d.lock(indItem);
+					d.close();
 				}
 			} break;
 
@@ -514,16 +543,11 @@ public final class Game {
 
 			// Simple actions
 
-			case GODMODE_TOGGLE:
-			{
-				if (!godmode) { godmode = true; output("God mode enabled."); }
-				else if (godmode) { godmode = false; output("God mode disabled."); }
-			} break;
 
 			case FAIL_ACTION: { output("Fail action."); } break;
 			case JUMP: { output("Wheeeeeeee!"); } break;
 			case SHOUT: { output("Yaaaaarrrrggghhh!"); } break;
-			case NULL_ACTION: { output("Null action detected."); } break;
+			case NULL_ACTION: {} break;
 			case VERBOSE: { output("You said too many words."); } break;
 			case PROFANITY: { output("There's no need for that kind of language."); } break;			
 			case QUIT: { /* if (verifyQuit()) */ gameover = true; } break;
@@ -532,8 +556,7 @@ public final class Game {
 		}
 
 
-		Actor actor = state.actorList.get("troll");
-		actor.move();
+		
 
 		state.addTurn();
 		if (state.getTurns() >=50)

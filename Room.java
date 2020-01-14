@@ -2,11 +2,11 @@ import java.util.ArrayList;
 
 class Room {
 	
-	protected final String name;
-	protected final String description;
-	protected final Location roomLoc;
+	public String name;
+	public String description;
+	public Location roomLoc;
 
-	protected boolean firstVisit;
+	public boolean firstVisit;
 
 
 	public Door northExit;

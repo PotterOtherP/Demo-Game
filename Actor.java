@@ -1,11 +1,10 @@
-class Actor {
+class Actor extends Feature {
 	
-	private final Location startingLocation;
-	private Location currentLocation;
-	private Location previousLocation;
+	public Location startingLocation;
+	public Location currentLocation;
+	public Location previousLocation;
 
-	protected final String name;
-
+	
 	public void move()
 	{
 		int number = (int)(Math.random()*4);
@@ -14,16 +13,12 @@ class Actor {
 
 	public Actor()
 	{
-		this.currentLocation = Location.NULL_LOCATION;
-		this.previousLocation = Location.NULL_LOCATION;
-		this.startingLocation = Location.NULL_LOCATION;
-		this.name = "";
+		super();
 	}
 
-	public Actor(Location loc, String name)
+	public Actor(String name, Location loc)
 	{
-		this.startingLocation = loc;
-		this.name = name;
+		super(name, loc);
 	}
 
 
