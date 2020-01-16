@@ -13,6 +13,10 @@ class Item extends Feature{
 		super(name, loc);
 	}
 
+	public Item(String name, Location loc, FeatureMethod fm)
+	{
+		super(name, loc, fm);
+	}
 
 
 

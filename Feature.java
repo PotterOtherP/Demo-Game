@@ -21,7 +21,7 @@ class Feature {
 	{
 		this.name = "null";
 		this.location = Location.NULL_LOCATION;
-		this.ft = (state, act) -> {};
+		this.ft = (act) -> {};
 	}
 
 	// Constructor with no unique methods
@@ -29,7 +29,7 @@ class Feature {
 	{
 		this.name = name;
 		this.location = loc;
-		this.ft = (state, act) -> {};
+		this.ft = (act) -> {};
 	}
 
 	public Feature(String name, Location loc, FeatureMethod fm)
@@ -40,9 +40,9 @@ class Feature {
 	}
 
 
-	public void activate(GameState state, Action act)
+	public void activate(Action act)
 	{
-		ft.outputMessage(state, act);
+		ft.outputMessage(act);
 	}
 
 	public boolean vowelStart()

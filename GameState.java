@@ -5,6 +5,7 @@ class GameState {
 	// gameplay information
 	public int turns;
 	public boolean bellRung;
+	public boolean eggOpened;
 
 
 	// player attributes
@@ -25,6 +26,7 @@ class GameState {
 	public Feature objectFeature;
 	public Actor objectActor;
 	public Item objectItem;
+	public String objectDoor;
 
 	public Item indirectObject;
 	public String speechText;
@@ -52,6 +54,7 @@ class GameState {
 		this.currentLocation = Location.NULL_LOCATION;
 		this.previousLocation = Location.NULL_LOCATION;
 		this.bellRung = false;
+		this.eggOpened = false;
 
 		worldMap = new HashMap<Location, Room>();
 		featureList = new HashMap<String, Feature>();
@@ -83,6 +86,7 @@ class GameState {
 		this.objectFeature = dummyFeature;
 		this.objectItem = dummyItem;
 		this.objectActor = dummyActor;
+		this.objectDoor = "";
 		this.indirectObject = dummyItem;
 	}
 

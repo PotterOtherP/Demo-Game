@@ -67,7 +67,7 @@ enum Action {
 
 interface FeatureMethod {
 
-	public void outputMessage(GameState state, Action act);
+	public void outputMessage(Action act);
 
 }
 
@@ -103,8 +103,12 @@ public final class Game {
 		while (!gameover)
 		{	
 			parsePlayerInput(gameState);
-			validateAction(gameState);
-			updateGame(gameState);
+			if (validateAction(gameState))
+			{
+				updateGame(gameState);
+				
+			}
+
 		}
 
 
@@ -156,18 +160,21 @@ public final class Game {
 		commandThree.put("unlock", Action.UNLOCK);
 		commandThree.put("lock", Action.LOCK);
 
-		FeatureMethod ringBell = (st, act) -> 
+		FeatureMethod ringBell = (act) -> 
 			{ 
-				switch(act)
+				switch (act)
 				{
 					case RING:
 					{
-						if (!st.bellRung)
-						{
-							output("The bell has not been rung before!");
-							st.bellRung = true;
-						}
 						output("Ding dong ding dong!");
+
+						if (!state.bellRung)
+						{
+							Item it = state.itemList.get("note");
+							it.location = Location.BLACK_ROOM;
+							output("A note falls out of the bell!");
+							state.bellRung = true;
+						}
 
 					} break;
 
@@ -182,20 +189,59 @@ public final class Game {
 
 			};
 
+		FeatureMethod readNote = (act) ->
+		{
+			switch (act)
+			{
+				case READ:
+				{
+					output("The note says: ");
+					output("It may seem odd, but sometimes playing a piano will do something to an egg.");
+				} break;
+
+				default: {} break;
+			}
+
+		};
+
+		FeatureMethod playPiano = (act) ->
+		{
+			switch (act)
+			{
+				case PLAY:
+				{
+					output("Da-da Da-da Da Da-da-da DUNNN...");
+					Item it = state.itemList.get("egg");
+					if (it.location == Location.PLAYER_INVENTORY)
+					{
+						if (!state.eggOpened)
+						{
+							output("The egg cracks open, revealing a key!");
+							it = state.itemList.get("key");
+							it.location = Location.PLAYER_INVENTORY;
+						}
+
+					}
+				} break;
+
+				default: {} break;
+			}
+		};
+
 
 		Feature nullFeature = new Feature();
 		Feature bell = new Feature("bell", Location.BLACK_ROOM, ringBell);
-		Feature piano = new Feature("piano", Location.WHITE_ROOM);
+		Feature piano = new Feature("piano", Location.WHITE_ROOM, playPiano);
 
 
 
 		Item nullItem = new Item();
 		Item itemRope = new Item("rope", Location.GREEN_ROOM);
 		Item itemEgg = new Item("egg", Location.BLUE_ROOM);
-		Item itemNote = new Item("note", Location.NULL_LOCATION);
+		Item itemNote = new Item("note", Location.NULL_LOCATION, readNote);
 		Item itemMagKey = new Item("key", Location.NULL_LOCATION);
 
-		Actor troll = new Actor("troll", Location.BLACK_ROOM);
+		Actor wizard = new Actor("wizard", Location.MAGIC_ROOM);
 
 		Door nullDoor = new Door();
 		Door redGreenDoor = new Door("passage", Location.RED_ROOM, Location.GREEN_ROOM, itemEgg);
@@ -206,7 +252,7 @@ public final class Game {
 		Door blueBlackDoor = new Door("passage", Location.BLUE_ROOM, Location.BLACK_ROOM, itemEgg);
 		Door whiteGreenDoor = new Door("passage", Location.WHITE_ROOM, Location.GREEN_ROOM, itemEgg);
 		Door whiteBlackDoor = new Door("passage", Location.WHITE_ROOM, Location.BLACK_ROOM, itemEgg);
-		Door magicDoor = new Door("door", Location.BLACK_ROOM, Location.MAGIC_ROOM, itemMagKey);
+		Door magicDoor = new Door("magicdoor", Location.BLACK_ROOM, Location.MAGIC_ROOM, itemMagKey);
 
 
 		state.itemList.put(nullItem.name, nullItem);
@@ -219,7 +265,7 @@ public final class Game {
 		state.featureList.put(bell.name, bell);
 		state.featureList.put(piano.name, piano);
 	
-		state.actorList.put(troll.name, troll);
+		state.actorList.put(wizard.name, wizard);
 
 		actionObjects.put(itemRope.name, "item");
 		actionObjects.put(itemEgg.name, "item");
@@ -229,6 +275,7 @@ public final class Game {
 		actionObjects.put(piano.name, "feature");
 		actionObjects.put(troll.name, "actor");
 		actionObjects.put("door", "door");
+		actionObjects.put("magicdoor", "door");
 
 
 		// Name, description, ID, North, South, East, West
@@ -318,13 +365,13 @@ public final class Game {
 
 	}
 
-	private static void validateAction(GameState state)
+	private static boolean validateAction(GameState state)
 	{
 		/* Verifies that the action arguments are recognized by the game.
 
 		   Gets more information from the player if the action is incomplete.
 		*/
-
+		boolean result = true;
 
 
 		String first = state.first;
@@ -333,8 +380,13 @@ public final class Game {
 
 		Action act = Action.NULL_ACTION;
 		if (commandOne.containsKey(first)) { act = commandOne.get(first); }
-		if (commandTwo.containsKey(first)) { act = commandTwo.get(first); }
-		if (commandThree.containsKey(first)) { act = commandThree.get(first); }
+		else if (commandTwo.containsKey(first)) { act = commandTwo.get(first); }
+		else if (commandThree.containsKey(first)) { act = commandThree.get(first); }
+		else
+		{ 
+			output("I don't know what \"" + first + "\" means.");
+			return false;
+		}
 
 		state.currentAction = act;
 
@@ -344,38 +396,58 @@ public final class Game {
 			{
 
 			} break;
+
+
 			case 2:
-			{
-				if (actionObjects.containsKey(second))
-				{
-					if (actionObjects.get(second).equals("feature"))
-					{
-						state.objectFeature = state.featureList.get(second);
-					}
-
-					if (actionObjects.get(second).equals("item"))
-					{
-						state.objectItem = state.itemList.get(second);
-					}
-
-					if (actionObjects.get(second).equals("actor"))
-					{
-						state.objectActor = state.actorList.get(second);
-					}
-
-					if (actionObjects.get(second).equals("door"))
-					{
-
-					}
-				}
-			} break;
 			case 3:
 			{
-				if (actionObjects.get(third).equals("item"))
+				if (!actionObjects.containsKey(second))
 				{
-					state.indirectObject = state.itemList.get(third);
+					output("I don't know what \"" + second + "\" means.");
+					return false;
 				}
+
+				
+				if (actionObjects.get(second).equals("feature"))
+				{
+					state.objectFeature = state.featureList.get(second);
+				}
+
+				if (actionObjects.get(second).equals("item"))
+				{
+					state.objectItem = state.itemList.get(second);
+				}
+
+				if (actionObjects.get(second).equals("actor"))
+				{
+					state.objectActor = state.actorList.get(second);
+				}
+
+				if (actionObjects.get(second).equals("door"))
+				{
+					state.objectDoor = second;
+				}
+				
+
+				if (!third.isEmpty() || actionObjects.containsKey(third))
+				{
+					if (actionObjects.get(third).equals("item"))
+					{
+						Item it = state.itemList.get(third);
+						if (it.location != Location.PLAYER_INVENTORY)
+						{
+							output("You're not carrying the " + it.name + ".");
+							return false;
+						}
+
+						state.indirectObject = it;
+
+
+					}
+				}
+			
 			} break;
+
 
 			default:
 			{
@@ -383,6 +455,8 @@ public final class Game {
 				output("Illegal number of command argments: " + state.numInputWords);
 			} break;
 		}
+
+		return result;
 
 	}
 
@@ -403,6 +477,7 @@ public final class Game {
 		Feature objFeature = state.objectFeature;
 		Item objItem = state.objectItem;
 		Actor objActor = state.objectActor;
+		String objDoor = state.objectDoor;
 
 		Item indItem = state.indirectObject;
 
@@ -411,6 +486,7 @@ public final class Game {
 		output("Selected feature is " + objFeature.name);
 		output("Selected item is " + objItem.name);
 		output("Selected actor is " + objActor.name);
+		output("Selected door is " + objDoor);
 		output("Indirect object is " + indItem.name);
 		*/
 
@@ -422,16 +498,25 @@ public final class Game {
 			case ACTIVATE:
 			case RING:
 			case PLAY:
-			case READ:
 			case KICK:
 			{
 				if (objFeature.name.equals("null")) return;
 
 				if (objFeature.location == curLoc)
-					objFeature.activate(state, curAction);
+					objFeature.activate(curAction);
 				else
 					output("There's no " + objFeature.name + " here.");
 
+			} break;
+
+			case READ:
+			{
+				if (objItem.name.equals("null")) return;
+
+				if (objItem.location == Location.PLAYER_INVENTORY)
+					objItem.activate(curAction);
+				else
+					output("You're not carrying the " + objItem.name + ".");
 			} break;
 			
 
@@ -501,8 +586,12 @@ public final class Game {
 			{
 				for (Door d : curRoom.exits)
 				{
-					d.unlock(indItem);
-					d.open();
+					if (d.name.equals(objDoor))
+					{
+						d.unlock(indItem);
+						d.open();
+					}
+					
 				}
 			
 			} break;
@@ -511,8 +600,11 @@ public final class Game {
 			{
 				for (Door d : curRoom.exits)
 				{
-					d.lock(indItem);
-					d.close();
+					if (d.name.equals(objDoor))
+					{
+						d.lock(indItem);
+						d.close();
+					}
 				}
 			} break;
 
