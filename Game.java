@@ -65,10 +65,19 @@ enum Action {
 
 	}
 
+// Interfaces for unique methods used by the game objects.
+
+// FeatureMethod: a method for an action performed by player on an object.
 interface FeatureMethod {
 
 	public void outputMessage(Action act);
 
+}
+
+// Method for an actor's "turn"
+interface ActorMethod {
+
+	public void actorUpdate();
 }
 
 
@@ -224,6 +233,11 @@ public final class Game {
 					}
 				} break;
 
+				case KICK:
+				{
+					output("That's not something you should do to this nice piano.");
+				} break;
+
 				default: {} break;
 			}
 		};
@@ -245,14 +259,14 @@ public final class Game {
 
 		Door nullDoor = new Door();
 		Door redGreenDoor = new Door("passage", Location.RED_ROOM, Location.GREEN_ROOM, itemEgg);
-		Door redBlackDoor = new Door("door", Location.RED_ROOM, Location.BLACK_ROOM, itemEgg);
+		Door redBlackDoor = new Door("passage", Location.RED_ROOM, Location.BLACK_ROOM, itemEgg);
 		Door redBlueDoor = new Door("passage", Location.RED_ROOM, Location.BLUE_ROOM, itemEgg);
 		Door redWhiteDoor = new Door("passage", Location.RED_ROOM, Location.WHITE_ROOM, itemEgg);
 		Door blueGreenDoor = new Door("passage", Location.BLUE_ROOM, Location.GREEN_ROOM, itemEgg);
 		Door blueBlackDoor = new Door("passage", Location.BLUE_ROOM, Location.BLACK_ROOM, itemEgg);
 		Door whiteGreenDoor = new Door("passage", Location.WHITE_ROOM, Location.GREEN_ROOM, itemEgg);
 		Door whiteBlackDoor = new Door("passage", Location.WHITE_ROOM, Location.BLACK_ROOM, itemEgg);
-		Door magicDoor = new Door("magicdoor", Location.BLACK_ROOM, Location.MAGIC_ROOM, itemMagKey);
+		Door magicDoor = new Door("door", Location.BLACK_ROOM, Location.MAGIC_ROOM, itemMagKey);
 
 
 		state.itemList.put(nullItem.name, nullItem);
@@ -273,7 +287,7 @@ public final class Game {
 		actionObjects.put(itemMagKey.name, "item");
 		actionObjects.put(bell.name, "feature");
 		actionObjects.put(piano.name, "feature");
-		actionObjects.put(troll.name, "actor");
+		actionObjects.put(wizard.name, "actor");
 		actionObjects.put("door", "door");
 		actionObjects.put("magicdoor", "door");
 
@@ -293,8 +307,7 @@ public final class Game {
 		state.worldMap.put(Location.BLUE_ROOM, blueRoom);
 		state.worldMap.put(Location.MAGIC_ROOM, magicRoom);
 
-		redBlackDoor.close();
-		redBlackDoor.lock();
+
 
 		magicDoor.close();
 		magicDoor.lock();
@@ -333,10 +346,17 @@ public final class Game {
 		String arg1 = "";
 		String arg2 = "";
 		String arg3 = "";
+		String arg4 = "";
 
 		try { arg1 = words[0]; } catch (Exception e) {}
 		try { arg2 = words[1]; } catch (Exception e) {}
 		try { arg3 = words[2]; } catch (Exception e) {}
+		try { arg4 = words[3]; } catch (Exception e) {}
+
+		if (!arg4.isEmpty() && arg3.equals("with"))
+		{
+			arg3 = arg4;
+		}
 
 		state.first = arg1;
 		state.second = arg2;
@@ -495,6 +515,8 @@ public final class Game {
 		switch (curAction)
 		{
 
+			// Features
+
 			case ACTIVATE:
 			case RING:
 			case PLAY:
@@ -509,6 +531,9 @@ public final class Game {
 
 			} break;
 
+
+			// Items
+
 			case READ:
 			{
 				if (objItem.name.equals("null")) return;
@@ -522,25 +547,7 @@ public final class Game {
 
 			case LOOK:
 			{
-				output(curRoom.description);
-
-				for (Feature ft : state.featureList.values())
-				{
-					if (ft.getLocation() == curLoc)
-					{
-						String word = (ft.vowelStart()? "an " : "a ");
-						output("There is " + word + ft.name + " here.");
-					}
-				}
-
-				for (Item it : state.itemList.values())
-				{
-					if (it.getLocation() == curLoc)
-					{
-						String word = (it.vowelStart()? "an " : "a ");
-						output("There is " + word + it.name + " here.");
-					}
-				}
+				curRoom.lookAround(state);
 
 			} break;
 
@@ -549,8 +556,17 @@ public final class Game {
 				
 				if (objItem.getLocation() == curLoc)
 				{
-					objItem.setLocation(Location.PLAYER_INVENTORY);
-					output("You picked up the " + objItem.name + ".");
+					if (objItem.location == Location.PLAYER_INVENTORY)
+					{
+						output("You're already carrying the " + objItem.name);
+						return;
+					}
+					else
+					{
+						objItem.setLocation(Location.PLAYER_INVENTORY);
+						output("You picked up the " + objItem.name + ".");
+						
+					}
 				}				
 				else
 				{
@@ -626,7 +642,7 @@ public final class Game {
 					if (curRoom.firstVisit)
 					{
 						curRoom.firstVisit = false;
-						output(curRoom.description);
+						curRoom.lookAround(state);
 					}
 				}
 
@@ -702,7 +718,9 @@ public final class Game {
 	{
 		// Save the gamestate
 
-		System.out.println("Game has ended.");
+		output("Game has ended.");
+		output("Total turns: " + state.turns);
+
 	}
 
 

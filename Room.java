@@ -58,6 +58,20 @@ class Room {
 
 	}
 
+	public void lookAround(GameState state)
+	{
+		Game.output(description);
+		for (Item it : state.itemList.values())
+		{
+			if (it.location == this.roomLoc)
+			{
+				String word = (it.vowelStart()? "an " : "a ");
+				Game.output("There is " + word + it.name + " here.");
+			}
+				
+		}
+	}
+
 
 	public boolean exit(GameState state, Action act)
 	{

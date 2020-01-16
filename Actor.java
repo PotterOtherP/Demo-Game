@@ -4,6 +4,7 @@ class Actor extends Feature {
 	public Location currentLocation;
 	public Location previousLocation;
 
+	public boolean activated;
 	
 	public void move()
 	{
@@ -14,11 +15,13 @@ class Actor extends Feature {
 	public Actor()
 	{
 		super();
+		activated = false;
 	}
 
 	public Actor(String name, Location loc)
 	{
 		super(name, loc);
+		activated = false;
 	}
 
 
