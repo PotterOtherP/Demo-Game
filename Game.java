@@ -19,10 +19,7 @@ enum Location {
 
 enum ActionType {
 
-	BLANK,
-	REFLEXIVE,
-	DIRECT,
-	INDIRECT
+	BLANK
 
 }
 
@@ -47,6 +44,7 @@ enum Action {
 	PROFANITY,
 	WAIT,
 	DEFEND,
+	HIGH_FIVE,
 
 	TAKE,
 	DROP,
@@ -70,7 +68,7 @@ enum Action {
 // FeatureMethod: a method for an action performed by player on an object.
 interface FeatureMethod {
 
-	public void outputMessage(Action act);
+	public void outputMessage();
 
 }
 
@@ -153,6 +151,7 @@ public final class Game {
 		commandOne.put("shout", Action.SHOUT);
 		commandOne.put("yell",  Action.SHOUT);
 		commandOne.put("scream",  Action.SHOUT);
+		commandOne.put("highfive", Action.HIGH_FIVE);
 
 		commandTwo.put("take", Action.TAKE);
 		commandTwo.put("drop", Action.DROP);
@@ -164,13 +163,18 @@ public final class Game {
 		commandTwo.put("play", Action.PLAY);
 		commandTwo.put("read", Action.READ);
 		commandTwo.put("kick", Action.KICK);
+		commandTwo.put("hit", Action.ATTACK);
+		commandTwo.put("attack", Action.ATTACK);
+		commandTwo.put("punch", Action.ATTACK);
 
 		commandThree.put("open", Action.OPEN);
 		commandThree.put("unlock", Action.UNLOCK);
 		commandThree.put("lock", Action.LOCK);
 
-		FeatureMethod ringBell = (act) -> 
+		FeatureMethod ringBell = () -> 
 			{ 
+				Action act = state.currentAction;
+
 				switch (act)
 				{
 					case RING:
@@ -198,8 +202,10 @@ public final class Game {
 
 			};
 
-		FeatureMethod readNote = (act) ->
+		FeatureMethod readNote = () ->
 		{
+			Action act = state.currentAction;
+
 			switch (act)
 			{
 				case READ:
@@ -213,8 +219,10 @@ public final class Game {
 
 		};
 
-		FeatureMethod playPiano = (act) ->
+		FeatureMethod playPiano = () ->
 		{
+			Action act = state.currentAction;
+
 			switch (act)
 			{
 				case PLAY:
@@ -242,6 +250,28 @@ public final class Game {
 			}
 		};
 
+		FeatureMethod wizardMethod = () ->
+		{
+			Action act = state.currentAction;
+
+			switch (act)
+			{
+				case ATTACK:
+				{
+					output("The wizard easily evades your feeble attempts at violence.");
+				} break;
+
+				case HIGH_FIVE:
+				{
+					output("You slap the wizard's open hand! The wizard cackles with glee and disappears in a clap of smoke.");
+					output("You won the game!");
+					gameover = true;
+				} break;
+
+				default: {} break;
+			}
+		};
+
 
 		Feature nullFeature = new Feature();
 		Feature bell = new Feature("bell", Location.BLACK_ROOM, ringBell);
@@ -255,7 +285,21 @@ public final class Game {
 		Item itemNote = new Item("note", Location.NULL_LOCATION, readNote);
 		Item itemMagKey = new Item("key", Location.NULL_LOCATION);
 
+
+		ActorMethod wizardAct = () ->
+		{
+			Actor self = state.actorList.get("wizard");
+
+			if (state.currentLocation == self.location)
+			{
+				output("Yer a wizard Harry!");
+			}
+
+		};
+
 		Actor wizard = new Actor("wizard", Location.MAGIC_ROOM);
+		wizard.actM = wizardAct;
+		wizard.ft = wizardMethod;
 
 		Door nullDoor = new Door();
 		Door redGreenDoor = new Door("passage", Location.RED_ROOM, Location.GREEN_ROOM, itemEgg);
@@ -449,7 +493,7 @@ public final class Game {
 				}
 				
 
-				if (!third.isEmpty() || actionObjects.containsKey(third))
+				if (!third.isEmpty() && actionObjects.containsKey(third))
 				{
 					if (actionObjects.get(third).equals("item"))
 					{
@@ -483,10 +527,7 @@ public final class Game {
 
 	private static void updateGame(GameState state)
 	{
-		/*	Executes the player's action on the arguments.
-			
-
-		*/
+		
 
 
 		Location curLoc = state.getCurrentLocation();
@@ -521,29 +562,39 @@ public final class Game {
 			case RING:
 			case PLAY:
 			case KICK:
-			{
-				if (objFeature.name.equals("null")) return;
-
-				if (objFeature.location == curLoc)
-					objFeature.activate(curAction);
-				else
-					output("There's no " + objFeature.name + " here.");
-
-			} break;
-
-
-			// Items
-
 			case READ:
+			case ATTACK:
+			case HIGH_FIVE:
 			{
-				if (objItem.name.equals("null")) return;
+				if (!objFeature.name.equals("null"))
+				{
+					if (objFeature.location == curLoc)
+						objFeature.activate();
+					else
+						output("There's no " + objFeature.name + " here.");
+				}
 
-				if (objItem.location == Location.PLAYER_INVENTORY)
-					objItem.activate(curAction);
-				else
-					output("You're not carrying the " + objItem.name + ".");
+				if (!objActor.name.equals("null"))
+				{
+					if (objActor.location == curLoc)
+						objActor.activate();
+					else
+						output("There's no " + objActor.name + " here.");
+				}
+
+				if (!objItem.name.equals("null"))
+				{
+					if (objItem.location == Location.PLAYER_INVENTORY)
+						objItem.activate();
+					else
+						output("You're not carrying the " + objItem.name + ".");
+				}
+
+				
+
 			} break;
-			
+
+
 
 			case LOOK:
 			{
@@ -663,15 +714,16 @@ public final class Game {
 			default: {} break;
 		}
 
+		// The player's action could end the game before anything else happens.
+		if (gameover) return;
 
-		
+
+		for (Actor a : state.actorList.values())
+		{
+			a.actorTurn();
+		}
 
 		state.addTurn();
-		if (state.getTurns() >=50)
-		{
-			output("Maximum turns reached, ending game.");
-			gameover = true;
-		}
 
 	}
 

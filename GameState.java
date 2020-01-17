@@ -23,6 +23,7 @@ class GameState {
 
 
 	public Action currentAction;
+	public ActionType currentActionType;
 	public Feature objectFeature;
 	public Actor objectActor;
 	public Item objectItem;
@@ -83,6 +84,7 @@ class GameState {
 		this.numInputWords = 0;
 
 		this.currentAction = Action.NULL_ACTION;
+		this.currentActionType = ActionType.BLANK;
 		this.objectFeature = dummyFeature;
 		this.objectItem = dummyItem;
 		this.objectActor = dummyActor;

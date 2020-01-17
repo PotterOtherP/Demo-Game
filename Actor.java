@@ -5,25 +5,28 @@ class Actor extends Feature {
 	public Location previousLocation;
 
 	public boolean activated;
+
+	public ActorMethod actM;
 	
-	public void move()
-	{
-		int number = (int)(Math.random()*4);
-		// Game.output("The " + name + "'s random number is " + number);
-	}
+
 
 	public Actor()
 	{
 		super();
 		activated = false;
+		this.actM = () -> {};
 	}
 
 	public Actor(String name, Location loc)
 	{
 		super(name, loc);
 		activated = false;
+		this.actM = () -> {};
 	}
 
-
+	public void actorTurn()
+	{
+		actM.actorUpdate();
+	}
 
 }
