@@ -14,6 +14,7 @@ class StringList {
 	public static final String CANT_GO = "You can't go that way.";
 
 	public static final String NOTE_TEXT = "It might seem odd, but sometimes a key can be found inside an egg. But how does one open such an egg?";
+	public static final String WIZARD_ONE = "You are a wizard Harry!";
 
 	// This class does not get instantiated.
 	private StringList() {}
