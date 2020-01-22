@@ -1,4 +1,4 @@
-class Door extends Feature {
+class Door extends GameObject {
 	
 	public boolean locked;
 	public boolean open;

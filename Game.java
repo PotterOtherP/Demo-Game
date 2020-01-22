@@ -63,20 +63,9 @@ enum Action {
 
 	}
 
-// Interfaces for unique methods used by the game objects.
 
-// FeatureMethod: a method for an action performed by player on an object.
-interface FeatureMethod {
 
-	public void outputMessage();
 
-}
-
-// Method for an actor's "turn"
-interface ActorMethod {
-
-	public void actorUpdate();
-}
 
 
 public final class Game {
@@ -171,7 +160,7 @@ public final class Game {
 		commandThree.put("unlock", Action.UNLOCK);
 		commandThree.put("lock", Action.LOCK);
 
-		FeatureMethod ringBell = () -> 
+		ActivateMethod ringBell = () -> 
 			{ 
 				Action act = state.currentAction;
 
@@ -184,7 +173,7 @@ public final class Game {
 						if (!state.bellRung)
 						{
 							Item it = state.itemList.get("note");
-							it.location = Location.BLACK_ROOM;
+							it.setLocation(Location.BLACK_ROOM);
 							output("A note falls out of the bell!");
 							state.bellRung = true;
 						}
@@ -202,7 +191,7 @@ public final class Game {
 
 			};
 
-		FeatureMethod readNote = () ->
+		ActivateMethod readNote = () ->
 		{
 			Action act = state.currentAction;
 
@@ -219,7 +208,7 @@ public final class Game {
 
 		};
 
-		FeatureMethod playPiano = () ->
+		ActivateMethod playPiano = () ->
 		{
 			Action act = state.currentAction;
 
@@ -229,13 +218,13 @@ public final class Game {
 				{
 					output("Da-da Da-da Da Da-da-da DUNNN...");
 					Item it = state.itemList.get("egg");
-					if (it.location == Location.PLAYER_INVENTORY)
+					if (it.getLocation() == Location.PLAYER_INVENTORY)
 					{
 						if (!state.eggOpened)
 						{
 							output("The egg cracks open, revealing a key!");
 							it = state.itemList.get("key");
-							it.location = Location.PLAYER_INVENTORY;
+							it.setLocation(Location.PLAYER_INVENTORY);
 						}
 
 					}
@@ -250,7 +239,7 @@ public final class Game {
 			}
 		};
 
-		FeatureMethod wizardMethod = () ->
+		ActivateMethod wizardMethod = () ->
 		{
 			Action act = state.currentAction;
 
@@ -297,9 +286,8 @@ public final class Game {
 
 		};
 
-		Actor wizard = new Actor("wizard", Location.MAGIC_ROOM);
-		wizard.actM = wizardAct;
-		wizard.ft = wizardMethod;
+		Actor wizard = new Actor("wizard", Location.MAGIC_ROOM, wizardMethod);
+		wizard.actorMethod = wizardAct;
 
 		Door nullDoor = new Door();
 		Door redGreenDoor = new Door("passage", Location.RED_ROOM, Location.GREEN_ROOM, itemEgg);
@@ -498,7 +486,7 @@ public final class Game {
 					if (actionObjects.get(third).equals("item"))
 					{
 						Item it = state.itemList.get(third);
-						if (it.location != Location.PLAYER_INVENTORY)
+						if (it.getLocation() != Location.PLAYER_INVENTORY)
 						{
 							output("You're not carrying the " + it.name + ".");
 							return false;
@@ -584,7 +572,7 @@ public final class Game {
 
 				if (!objItem.name.equals("null"))
 				{
-					if (objItem.location == Location.PLAYER_INVENTORY)
+					if (objItem.getLocation() == Location.PLAYER_INVENTORY)
 						objItem.activate();
 					else
 						output("You're not carrying the " + objItem.name + ".");
@@ -607,7 +595,7 @@ public final class Game {
 				
 				if (objItem.getLocation() == curLoc)
 				{
-					if (objItem.location == Location.PLAYER_INVENTORY)
+					if (objItem.getLocation() == Location.PLAYER_INVENTORY)
 					{
 						output("You're already carrying the " + objItem.name);
 						return;

@@ -63,7 +63,7 @@ class Room {
 		Game.output(description);
 		for (Item it : state.itemList.values())
 		{
-			if (it.location == this.roomLoc)
+			if (it.getLocation() == this.roomLoc)
 			{
 				String word = (it.vowelStart()? "an " : "a ");
 				Game.output("There is " + word + it.name + " here.");

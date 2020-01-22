@@ -1,4 +1,10 @@
-class Actor extends Feature {
+// Method for an actor's "turn"
+interface ActorMethod {
+
+	public void actorUpdate();
+}
+
+class Actor extends GameObject {
 	
 	public Location startingLocation;
 	public Location currentLocation;
@@ -6,7 +12,7 @@ class Actor extends Feature {
 
 	public boolean activated;
 
-	public ActorMethod actM;
+	public ActorMethod actorMethod;
 	
 
 
@@ -14,19 +20,35 @@ class Actor extends Feature {
 	{
 		super();
 		activated = false;
-		this.actM = () -> {};
+		this.actorMethod = () -> {};
+	}
+
+	public Actor(String name)
+	{
+		super(name);
+		activated = false;
+		this.actorMethod = () -> {};
 	}
 
 	public Actor(String name, Location loc)
 	{
 		super(name, loc);
 		activated = false;
-		this.actM = () -> {};
+		this.actorMethod = () -> {};
 	}
+
+	public Actor(String name, Location loc, ActivateMethod am)
+	{
+		super(name, loc, am);
+		activated = false;
+		this.actorMethod = () -> {};
+	}
+
+
 
 	public void actorTurn()
 	{
-		actM.actorUpdate();
+		actorMethod.actorUpdate();
 	}
 
 }
