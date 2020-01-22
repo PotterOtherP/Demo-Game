@@ -286,8 +286,7 @@ public final class Game {
 
 		};
 
-		Actor wizard = new Actor("wizard", Location.MAGIC_ROOM, wizardMethod);
-		wizard.actorMethod = wizardAct;
+		Actor wizard = new Actor("wizard", Location.MAGIC_ROOM, wizardMethod, wizardAct);
 
 		Door nullDoor = new Door();
 		Door redGreenDoor = new Door("passage", Location.RED_ROOM, Location.GREEN_ROOM, itemEgg);

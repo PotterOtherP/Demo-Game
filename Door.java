@@ -1,16 +1,20 @@
 class Door extends GameObject {
 	
-	public boolean locked;
-	public boolean open;
+	private boolean locked;
+	private boolean open;
 
 
-	public Location locationA;
-	public Location locationB;
-	public Item keyItem;
+	public final Location locationA;
+	public final Location locationB;
+	public final Item keyItem;
 
+
+	// Constructors
 	public Door()
 	{
 		super();
+		this.locationA = Location.NULL_LOCATION;
+		this.locationB = Location.NULL_LOCATION;
 		this.keyItem = new Item();
 		this.locked = true;
 		this.open = false;
@@ -18,7 +22,7 @@ class Door extends GameObject {
 
 	public Door(String name, Location locA, Location locB, Item it)
 	{
-		super(name, locA);
+		super(name, Location.NULL_LOCATION);
 		this.locationA = locA;
 		this.locationB = locB;
 		this.keyItem = it;
@@ -26,10 +30,18 @@ class Door extends GameObject {
 		this.open = true;
 	}
 
-	public void lock()
+	public Door(String name, Location locA, Location locB, Item it, ActivateMethod am)
 	{
-		this.locked = true;
+		super(name, Location.NULL_LOCATION, am);
+		this.locationA = locA;
+		this.locationB = locB;
+		this.keyItem = it;
+		this.locked = false;
+		this.open = true;
 	}
+
+	
+	// These methods are used by the player when they try to open the door.
 
 	public boolean lock(Item it)
 	{
@@ -49,13 +61,9 @@ class Door extends GameObject {
 		return result;
 	}
 
-	public void unlock()
-	{
-		this.locked = false;
-	}
-
 	public boolean unlock(Item it)
 	{
+
 		boolean result = false;
 		if (it == keyItem)
 		{
@@ -71,25 +79,15 @@ class Door extends GameObject {
 		return result;
 	}
 
-	public boolean isLocked()
-	{
-		return locked;
-	}
 
-	public void open()
-	{
-		this.open = true;
-	}
+	public void unlock() { locked = false; }
+	public void lock() { locked = true; }
 
-	public void close()
-	{
-		this.open = false;
-	}
+	public void open() { open = true; }
+	public void close() { open = false; }
 
-	public boolean isOpen()
-	{
-		return open;
-	}
+	public boolean isLocked() { return locked; }
+	public boolean isOpen() { return open; }
 
 
 

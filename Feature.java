@@ -5,9 +5,6 @@ class Feature extends GameObject {
 
 	*/
 	
-
-
-
 	
 	public Feature()
 	{
