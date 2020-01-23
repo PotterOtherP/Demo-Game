@@ -14,6 +14,7 @@ class Actor extends GameObject {
 	public final ActorMethod actorMethod;
 	
 	private boolean alive;
+	private boolean encountered;
 
 
 	// Constructors. An actor must be either empty or have a location, activation method
@@ -21,7 +22,7 @@ class Actor extends GameObject {
 	public Actor()
 	{
 		super();
-		alive = false;
+		setVariables();
 		this.startLocation = Location.NULL_LOCATION;
 		this.currentLocation = Location.NULL_LOCATION;
 		this.previousLocation = Location.NULL_LOCATION;
@@ -32,7 +33,7 @@ class Actor extends GameObject {
 	public Actor(String name, Location loc, ActivateMethod am, ActorMethod actm)
 	{
 		super(name, loc, am);
-		alive = false;
+		setVariables();
 		this.startLocation = super.location;
 		this.currentLocation = super.location;
 		this.previousLocation = super.location;
@@ -45,10 +46,24 @@ class Actor extends GameObject {
 		actorMethod.actorUpdate();
 	}
 
+	private void setVariables()
+	{
+		this.alive = true;
+		this.encountered = false;
+	}
+
 
 
 	public void setAlive(boolean b) { alive = b; }
 	public boolean isAlive() { return alive; }
+	public void setEncountered(boolean b ) { encountered = b; }
+	public boolean playerHasEncountered() { return encountered; }
+
+	public void setLocation(Location loc) { currentLocation = loc; }
+	public Location getLocation() { return currentLocation; }
+
+	public void setPreviousLocation(Location loc) { previousLocation = loc; }
+	public Location getPreviousLocation() { return previousLocation; }
 
 
 }

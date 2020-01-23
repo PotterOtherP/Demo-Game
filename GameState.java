@@ -6,13 +6,14 @@ class GameState {
 	public int turns;
 	public boolean bellRung;
 	public boolean eggOpened;
+	public boolean wizardHandUp;
+	public int wizardTurns;
 
 
 	// player attributes
-	public Location currentLocation;
-	public Location previousLocation;
-	public int hitPoints;
-	public int agility;
+	private Location playerLocation;
+	private Location playerPreviousLocation;
+	private int playerHitPoints;
 
 
 	// player action
@@ -52,10 +53,12 @@ class GameState {
 		this.resetInput();
 
 		this.turns = 0;
-		this.currentLocation = Location.NULL_LOCATION;
-		this.previousLocation = Location.NULL_LOCATION;
+		this.playerLocation = Location.NULL_LOCATION;
+		this.playerPreviousLocation = Location.NULL_LOCATION;
 		this.bellRung = false;
 		this.eggOpened = false;
+		this.wizardHandUp = false;
+		this.wizardTurns = 1;
 
 		worldMap = new HashMap<Location, Room>();
 		featureList = new HashMap<String, Feature>();
@@ -65,11 +68,11 @@ class GameState {
 
 
 
-	public void setCurrentLocation(Location loc) { currentLocation = loc; }
-	public Location getCurrentLocation() { return currentLocation; }
+	public void setPlayerLocation(Location loc) { playerLocation = loc; }
+	public Location getPlayerLocation() { return playerLocation; }
 
-	public void setPreviousLocation(Location loc) { previousLocation = loc; }
-	public Location getPreviousLocation() { return previousLocation; }
+	public void setPreviousLocation(Location loc) { playerPreviousLocation = loc; }
+	public Location getPreviousLocation() { return playerPreviousLocation; }
 
 	public void setCurrentAction(Action act) { currentAction = act; }
 	public Action getCurrentAction() { return currentAction; }

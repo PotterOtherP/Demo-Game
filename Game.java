@@ -141,6 +141,7 @@ public final class Game {
 		commandOne.put("yell",  Action.SHOUT);
 		commandOne.put("scream",  Action.SHOUT);
 		commandOne.put("highfive", Action.HIGH_FIVE);
+		commandOne.put("wait", Action.WAIT);
 
 		commandTwo.put("take", Action.TAKE);
 		commandTwo.put("drop", Action.DROP);
@@ -252,9 +253,16 @@ public final class Game {
 
 				case HIGH_FIVE:
 				{
-					output("You slap the wizard's open hand! The wizard cackles with glee and disappears in a clap of smoke.");
-					output("You won the game!");
-					gameover = true;
+					if (state.wizardHandUp)
+					{
+						output(StringList.WIZARD_HIGHFIVE);
+						output(StringList.GAME_WON);
+						gameover = true;						
+					}
+					else
+					{
+						output(StringList.HIGHFIVE_FAIL);
+					}
 				} break;
 
 				default: {} break;
@@ -279,10 +287,27 @@ public final class Game {
 		{
 			Actor self = state.actorList.get("wizard");
 
-			if (state.currentLocation == self.location)
+			if (state.getPlayerLocation() != self.currentLocation)
 			{
-				output("Yer a wizard Harry!");
+				return;
 			}
+
+			if (!self.playerHasEncountered())
+			{
+				// output("There is a wizard here!");
+				self.setEncountered(true);
+			}
+
+			String[] wizStrings = {StringList.WIZARD_ONE, StringList.WIZARD_TWO, StringList.WIZARD_THREE, StringList.WIZARD_FOUR, StringList.WIZARD_FIVE};
+
+			int x = (int)(Math.random() * 5);
+			if (state.wizardTurns % 5 == 0)
+				x = 4;
+
+			state.wizardHandUp = (x == 4? true : false);
+
+			output(wizStrings[x]);
+			++state.wizardTurns;
 
 		};
 
@@ -348,7 +373,7 @@ public final class Game {
 
 
 		// Put the player in the starting location
-		state.setCurrentLocation(initialLocation);
+		state.setPlayerLocation(initialLocation);
 		state.worldMap.get(initialLocation).firstVisit = false;
 
 		// Beginning text of the game.
@@ -517,7 +542,7 @@ public final class Game {
 		
 
 
-		Location curLoc = state.getCurrentLocation();
+		Location curLoc = state.getPlayerLocation();
 		Room curRoom = state.worldMap.get(curLoc);
 
 		Action curAction = state.getCurrentAction();
@@ -674,7 +699,7 @@ public final class Game {
 
 				if (exited)
 				{
-					curRoom = state.worldMap.get(state.getCurrentLocation());
+					curRoom = state.worldMap.get(state.getPlayerLocation());
 					output(curRoom.name);
 					outputLine();
 					if (curRoom.firstVisit)
@@ -689,7 +714,7 @@ public final class Game {
 
 			// Simple actions
 
-
+			case WAIT: { output("Time passes..."); } break;
 			case FAIL_ACTION: { output("Fail action."); } break;
 			case JUMP: { output("Wheeeeeeee!"); } break;
 			case SHOUT: { output("Yaaaaarrrrggghhh!"); } break;
@@ -707,7 +732,7 @@ public final class Game {
 
 		for (Actor a : state.actorList.values())
 		{
-			a.actorTurn();
+			if (a.isAlive()) { a.actorTurn(); }
 		}
 
 		state.addTurn();

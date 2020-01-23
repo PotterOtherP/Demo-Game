@@ -2,17 +2,17 @@ import java.util.ArrayList;
 
 class Room {
 	
-	public String name;
-	public String description;
-	public Location roomLoc;
+	public final String name;
+	public final String description;
+	public final Location roomLoc;
 
 	public boolean firstVisit;
 
 
-	public Door northExit;
-	public Door southExit;
-	public Door eastExit;
-	public Door westExit;
+	public final Door northExit;
+	public final Door southExit;
+	public final Door eastExit;
+	public final Door westExit;
 
 	public ArrayList<Door> exits;
 
@@ -70,6 +70,15 @@ class Room {
 			}
 				
 		}
+
+		for (Actor a : state.actorList.values())
+		{
+			if (a.getLocation() == this.roomLoc)
+			{
+				String word = (a.vowelStart()? "an " : "a ");
+				Game.output("There is " + word + a.name + " here.");
+			}
+		}
 	}
 
 
@@ -109,8 +118,8 @@ class Room {
 			// If the door is open... success
 			if (d.isOpen())
 			{
-				state.setPreviousLocation(state.getCurrentLocation());
-				state.setCurrentLocation(dest);
+				state.setPreviousLocation(state.getPlayerLocation());
+				state.setPlayerLocation(dest);
 				result = true;
 			}
 
