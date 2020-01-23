@@ -59,7 +59,8 @@ enum Action {
 	READ,
 	KICK,
 
-	ATTACK
+	ATTACK,
+	TIE
 
 	}
 
@@ -160,6 +161,7 @@ public final class Game {
 		commandThree.put("open", Action.OPEN);
 		commandThree.put("unlock", Action.UNLOCK);
 		commandThree.put("lock", Action.LOCK);
+		commandThree.put("tie", Action.TIE);
 
 		ActivateMethod ringBell = () -> 
 			{ 
@@ -169,6 +171,12 @@ public final class Game {
 				{
 					case RING:
 					{
+						if (!state.bellRopeTied)
+						{
+							output(StringList.BELL_RING_FAIL);
+							return;
+						}
+
 						output("Ding dong ding dong!");
 
 						if (!state.bellRung)
@@ -179,6 +187,19 @@ public final class Game {
 							state.bellRung = true;
 						}
 
+					} break;
+
+					case TIE:
+					{
+						if (state.indirectObject.name.equals("rope"))
+						{
+							output(StringList.BELL_ROPE_TIE);
+							state.bellRopeTied = true;
+						}
+						else
+						{
+							output(StringList.BELL_ROPE_TIE_FAIL);
+						}
 					} break;
 
 					case KICK:
@@ -247,6 +268,7 @@ public final class Game {
 			switch (act)
 			{
 				case ATTACK:
+				case KICK:
 				{
 					output("The wizard easily evades your feeble attempts at violence.");
 				} break;
@@ -575,6 +597,7 @@ public final class Game {
 			case PLAY:
 			case KICK:
 			case READ:
+			case TIE:
 			case ATTACK:
 			case HIGH_FIVE:
 			{

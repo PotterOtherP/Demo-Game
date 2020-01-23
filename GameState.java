@@ -8,6 +8,7 @@ class GameState {
 	public boolean eggOpened;
 	public boolean wizardHandUp;
 	public int wizardTurns;
+	public boolean bellRopeTied;
 
 
 	// player attributes
@@ -59,6 +60,7 @@ class GameState {
 		this.eggOpened = false;
 		this.wizardHandUp = false;
 		this.wizardTurns = 1;
+		this.bellRopeTied = false;
 
 		worldMap = new HashMap<Location, Room>();
 		featureList = new HashMap<String, Feature>();
