@@ -20,12 +20,6 @@ class Item extends GameObject{
 		this.location = this.startLocation;
 	}
 
-	public Item(String name, Location loc, ActivateMethod am)
-	{
-		super(name, loc, am);
-		this.startLocation = super.location;
-		this.location = this.startLocation;
-	}
 
 	public void setLocation(Location loc) { this.location = loc; }
 	public Location getLocation() { return this.location; }

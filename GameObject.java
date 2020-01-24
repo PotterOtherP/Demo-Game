@@ -7,7 +7,7 @@ abstract class GameObject {
     
     public final String name;
     public final Location location;
-    public final ActivateMethod method;
+    private ActivateMethod method;
 
     // Constructors
     public GameObject()
@@ -32,10 +32,8 @@ abstract class GameObject {
         this.method = () -> {};
     }
 
-    public GameObject(String name, Location loc, ActivateMethod am)
+    public void setMethod(ActivateMethod am)
     {
-        this.name = name;
-        this.location = loc;
         this.method = am;
     }
 

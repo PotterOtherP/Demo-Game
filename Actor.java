@@ -11,7 +11,7 @@ class Actor extends GameObject {
 	public Location previousLocation;
 
 
-	public final ActorMethod actorMethod;
+	private ActorMethod actorMethod;
 	
 	private boolean alive;
 	private boolean encountered;
@@ -30,14 +30,13 @@ class Actor extends GameObject {
 	}
 
 
-	public Actor(String name, Location loc, ActivateMethod am, ActorMethod actm)
+	public Actor(String name, Location loc)
 	{
-		super(name, loc, am);
+		super(name, loc);
 		setVariables();
 		this.startLocation = super.location;
 		this.currentLocation = super.location;
 		this.previousLocation = super.location;
-		this.actorMethod = actm;
 	}
 
 
@@ -50,6 +49,11 @@ class Actor extends GameObject {
 	{
 		this.alive = true;
 		this.encountered = false;
+	}
+
+	public void setActorMethod(ActorMethod am)
+	{
+		this.actorMethod = am;
 	}
 
 

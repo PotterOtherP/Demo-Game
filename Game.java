@@ -116,6 +116,76 @@ public final class Game {
 
 	private static void initGame(GameState state)
 	{	
+		// Create all the objects first, then the lists, then the methods
+
+
+
+		Feature nullFeature = new Feature();
+		Feature bell = new Feature("bell", Location.BLACK_ROOM);
+		Feature piano = new Feature("piano", Location.WHITE_ROOM);
+		Feature magDoorFeature = new Feature("door", Location.BLACK_ROOM);
+
+
+
+		Item nullItem = new Item();
+		Item itemRope = new Item("rope", Location.GREEN_ROOM);
+		Item itemEgg = new Item("egg", Location.BLUE_ROOM);
+		Item itemNote = new Item("note", Location.NULL_LOCATION);
+		Item itemMagKey = new Item("key", Location.NULL_LOCATION);
+
+		Actor wizard = new Actor("wizard", Location.MAGIC_ROOM);
+
+		Door nullDoor = new Door();
+		Door redGreenDoor = new Door("passage", GameStrings.CANT_GO, GameStrings.CANT_GO, Location.RED_ROOM, Location.GREEN_ROOM);
+		Door redBlackDoor = new Door("passage", GameStrings.CANT_GO, GameStrings.CANT_GO, Location.RED_ROOM, Location.BLACK_ROOM);
+		Door redBlueDoor = new Door("passage", GameStrings.CANT_GO, GameStrings.CANT_GO, Location.RED_ROOM, Location.BLUE_ROOM);
+		Door redWhiteDoor = new Door("passage", GameStrings.CANT_GO, GameStrings.CANT_GO, Location.RED_ROOM, Location.WHITE_ROOM);
+		Door blueGreenDoor = new Door("passage", GameStrings.CANT_GO, GameStrings.CANT_GO, Location.BLUE_ROOM, Location.GREEN_ROOM);
+		Door blueBlackDoor = new Door("passage", GameStrings.CANT_GO, GameStrings.CANT_GO, Location.BLUE_ROOM, Location.BLACK_ROOM);
+		Door whiteGreenDoor = new Door("passage", GameStrings.CANT_GO, GameStrings.CANT_GO, Location.WHITE_ROOM, Location.GREEN_ROOM);
+		Door whiteBlackDoor = new Door("passage", GameStrings.CANT_GO, GameStrings.CANT_GO, Location.WHITE_ROOM, Location.BLACK_ROOM);
+		Door magicDoor = new Door("door", GameStrings.MAGICDOOR_LOCKED, GameStrings.CANT_GO, Location.BLACK_ROOM, Location.MAGIC_ROOM);
+
+		// Name, description, ID, North, South, East, West
+		Room redRoom = new Room("Red Room", GameStrings.DESC_RED_ROOM, Location.RED_ROOM, redGreenDoor, redBlackDoor, redWhiteDoor, redBlueDoor);
+		Room greenRoom = new Room("Green Room", GameStrings.DESC_GREEN_ROOM, Location.GREEN_ROOM, nullDoor, redGreenDoor, whiteGreenDoor, blueGreenDoor);
+		Room blackRoom = new Room("Black Room", GameStrings.DESC_BLACK_ROOM, Location.BLACK_ROOM, redBlackDoor, magicDoor, whiteBlackDoor, blueBlackDoor);
+		Room whiteRoom = new Room("White Room", GameStrings.DESC_WHITE_ROOM, Location.WHITE_ROOM, whiteGreenDoor, whiteBlackDoor, nullDoor, redWhiteDoor);
+		Room blueRoom = new Room("Blue Room", GameStrings.DESC_BLUE_ROOM, Location.BLUE_ROOM, blueGreenDoor, blueBlackDoor, redBlueDoor, nullDoor);
+		Room magicRoom = new Room("Magic Room", GameStrings.DESC_MAGIC_ROOM, Location.MAGIC_ROOM, magicDoor, nullDoor, nullDoor, nullDoor);
+
+		state.itemList.put(nullItem.name, nullItem);
+		state.itemList.put(itemRope.name, itemRope);
+		state.itemList.put(itemEgg.name, itemEgg);
+		state.itemList.put(itemNote.name, itemNote);
+		state.itemList.put(itemMagKey.name, itemMagKey);
+
+		state.featureList.put(nullFeature.name, nullFeature);
+		state.featureList.put(bell.name, bell);
+		state.featureList.put(piano.name, piano);
+		state.featureList.put(magDoorFeature.name, magDoorFeature);
+	
+		state.actorList.put(wizard.name, wizard);
+
+		actionObjects.put(itemRope.name, "item");
+		actionObjects.put(itemEgg.name, "item");
+		actionObjects.put(itemNote.name, "item");
+		actionObjects.put(itemMagKey.name, "item");
+		actionObjects.put(bell.name, "feature");
+		actionObjects.put(piano.name, "feature");
+		actionObjects.put(wizard.name, "actor");
+		actionObjects.put("door", "door");
+		actionObjects.put("magicdoor", "door");
+
+
+		
+
+		state.worldMap.put(Location.RED_ROOM, redRoom);
+		state.worldMap.put(Location.GREEN_ROOM, greenRoom);
+		state.worldMap.put(Location.BLACK_ROOM, blackRoom);
+		state.worldMap.put(Location.WHITE_ROOM, whiteRoom);
+		state.worldMap.put(Location.BLUE_ROOM, blueRoom);
+		state.worldMap.put(Location.MAGIC_ROOM, magicRoom);
 
 		commandOne.put("north", Action.EXIT_NORTH);
 		commandOne.put("n",     Action.EXIT_NORTH);
@@ -164,54 +234,56 @@ public final class Game {
 		commandThree.put("tie", Action.TIE);
 
 		ActivateMethod ringBell = () -> 
-			{ 
-				Action act = state.currentAction;
+		{ 
+			Action act = state.currentAction;
 
-				switch (act)
+			switch (act)
+			{
+				case RING:
 				{
-					case RING:
+					if (!state.bellRopeTied)
 					{
-						if (!state.bellRopeTied)
-						{
-							output(StringList.BELL_RING_FAIL);
-							return;
-						}
+						output(GameStrings.BELL_RING_FAIL);
+						return;
+					}
 
-						output("Ding dong ding dong!");
+					output("Ding dong ding dong!");
 
-						if (!state.bellRung)
-						{
-							Item it = state.itemList.get("note");
-							it.setLocation(Location.BLACK_ROOM);
-							output("A note falls out of the bell!");
-							state.bellRung = true;
-						}
-
-					} break;
-
-					case TIE:
+					if (!state.bellRung)
 					{
-						if (state.indirectObject.name.equals("rope"))
-						{
-							output(StringList.BELL_ROPE_TIE);
-							state.bellRopeTied = true;
-						}
-						else
-						{
-							output(StringList.BELL_ROPE_TIE_FAIL);
-						}
-					} break;
+						Item it = state.itemList.get("note");
+						it.setLocation(Location.BLACK_ROOM);
+						output("A note falls out of the bell!");
+						state.bellRung = true;
+					}
 
-					case KICK:
+				} break;
+
+				case TIE:
+				{
+					if (state.indirectObject.name.equals("rope"))
 					{
-						output("BWWWOOONG!! Ow!");
-					} break;
+						output(GameStrings.BELL_ROPE_TIE);
+						Item it = state.itemList.get("rope");
+						it.setLocation(Location.BLACK_ROOM);
+						state.bellRopeTied = true;
+					}
+					else
+					{
+						output(GameStrings.BELL_ROPE_TIE_FAIL);
+					}
+				} break;
 
-					default: {} break;
+				case KICK:
+				{
+					output("BWWWOOONG!! Ow!");
+				} break;
 
-				}
+				default: {} break;
 
-			};
+			}
+
+		};
 
 		ActivateMethod readNote = () ->
 		{
@@ -277,13 +349,13 @@ public final class Game {
 				{
 					if (state.wizardHandUp)
 					{
-						output(StringList.WIZARD_HIGHFIVE);
-						output(StringList.GAME_WON);
+						output(GameStrings.WIZARD_HIGHFIVE);
+						output(GameStrings.GAME_WON);
 						gameover = true;						
 					}
 					else
 					{
-						output(StringList.HIGHFIVE_FAIL);
+						output(GameStrings.HIGHFIVE_FAIL);
 					}
 				} break;
 
@@ -291,18 +363,25 @@ public final class Game {
 			}
 		};
 
+		ActivateMethod openMagicDoor = () -> 
+		{
+			Item it = state.indirectObject;
+			
+			if (it.name == itemMagKey.name)
+			{
+				output("You unlock the door with the key.");
+				magicDoor.unlock();
+				magicDoor.open();
+			}
 
-		Feature nullFeature = new Feature();
-		Feature bell = new Feature("bell", Location.BLACK_ROOM, ringBell);
-		Feature piano = new Feature("piano", Location.WHITE_ROOM, playPiano);
+			else
+			{
+				output(magicDoor.lockFail);
+			}
+		};
 
 
-
-		Item nullItem = new Item();
-		Item itemRope = new Item("rope", Location.GREEN_ROOM);
-		Item itemEgg = new Item("egg", Location.BLUE_ROOM);
-		Item itemNote = new Item("note", Location.NULL_LOCATION, readNote);
-		Item itemMagKey = new Item("key", Location.NULL_LOCATION);
+		
 
 
 		ActorMethod wizardAct = () ->
@@ -320,7 +399,7 @@ public final class Game {
 				self.setEncountered(true);
 			}
 
-			String[] wizStrings = {StringList.WIZARD_ONE, StringList.WIZARD_TWO, StringList.WIZARD_THREE, StringList.WIZARD_FOUR, StringList.WIZARD_FIVE};
+			String[] wizStrings = {GameStrings.WIZARD_ONE, GameStrings.WIZARD_TWO, GameStrings.WIZARD_THREE, GameStrings.WIZARD_FOUR, GameStrings.WIZARD_FIVE};
 
 			int x = (int)(Math.random() * 5);
 			if (state.wizardTurns % 5 == 0)
@@ -333,57 +412,14 @@ public final class Game {
 
 		};
 
-		Actor wizard = new Actor("wizard", Location.MAGIC_ROOM, wizardMethod, wizardAct);
-
-		Door nullDoor = new Door();
-		Door redGreenDoor = new Door("passage", Location.RED_ROOM, Location.GREEN_ROOM, itemEgg);
-		Door redBlackDoor = new Door("passage", Location.RED_ROOM, Location.BLACK_ROOM, itemEgg);
-		Door redBlueDoor = new Door("passage", Location.RED_ROOM, Location.BLUE_ROOM, itemEgg);
-		Door redWhiteDoor = new Door("passage", Location.RED_ROOM, Location.WHITE_ROOM, itemEgg);
-		Door blueGreenDoor = new Door("passage", Location.BLUE_ROOM, Location.GREEN_ROOM, itemEgg);
-		Door blueBlackDoor = new Door("passage", Location.BLUE_ROOM, Location.BLACK_ROOM, itemEgg);
-		Door whiteGreenDoor = new Door("passage", Location.WHITE_ROOM, Location.GREEN_ROOM, itemEgg);
-		Door whiteBlackDoor = new Door("passage", Location.WHITE_ROOM, Location.BLACK_ROOM, itemEgg);
-		Door magicDoor = new Door("door", Location.BLACK_ROOM, Location.MAGIC_ROOM, itemMagKey);
+		bell.setMethod(ringBell);
+		piano.setMethod(playPiano);
+		itemNote.setMethod(readNote);
+		wizard.setMethod(wizardMethod);
+		wizard.setActorMethod(wizardAct);
 
 
-		state.itemList.put(nullItem.name, nullItem);
-		state.itemList.put(itemRope.name, itemRope);
-		state.itemList.put(itemEgg.name, itemEgg);
-		state.itemList.put(itemNote.name, itemNote);
-		state.itemList.put(itemMagKey.name, itemMagKey);
-
-		state.featureList.put(nullFeature.name, nullFeature);
-		state.featureList.put(bell.name, bell);
-		state.featureList.put(piano.name, piano);
-	
-		state.actorList.put(wizard.name, wizard);
-
-		actionObjects.put(itemRope.name, "item");
-		actionObjects.put(itemEgg.name, "item");
-		actionObjects.put(itemNote.name, "item");
-		actionObjects.put(itemMagKey.name, "item");
-		actionObjects.put(bell.name, "feature");
-		actionObjects.put(piano.name, "feature");
-		actionObjects.put(wizard.name, "actor");
-		actionObjects.put("door", "door");
-		actionObjects.put("magicdoor", "door");
-
-
-		// Name, description, ID, North, South, East, West
-		Room redRoom = new Room("Red Room", StringList.DESC_RED_ROOM, Location.RED_ROOM, redGreenDoor, redBlackDoor, redWhiteDoor, redBlueDoor);
-		Room greenRoom = new Room("Green Room", StringList.DESC_GREEN_ROOM, Location.GREEN_ROOM, nullDoor, redGreenDoor, whiteGreenDoor, blueGreenDoor);
-		Room blackRoom = new Room("Black Room", StringList.DESC_BLACK_ROOM, Location.BLACK_ROOM, redBlackDoor, magicDoor, whiteBlackDoor, blueBlackDoor);
-		Room whiteRoom = new Room("White Room", StringList.DESC_WHITE_ROOM, Location.WHITE_ROOM, whiteGreenDoor, whiteBlackDoor, nullDoor, redWhiteDoor);
-		Room blueRoom = new Room("Blue Room", StringList.DESC_BLUE_ROOM, Location.BLUE_ROOM, blueGreenDoor, blueBlackDoor, redBlueDoor, nullDoor);
-		Room magicRoom = new Room("Magic Room", StringList.DESC_MAGIC_ROOM, Location.MAGIC_ROOM, magicDoor, nullDoor, nullDoor, nullDoor);
-
-		state.worldMap.put(Location.RED_ROOM, redRoom);
-		state.worldMap.put(Location.GREEN_ROOM, greenRoom);
-		state.worldMap.put(Location.BLACK_ROOM, blackRoom);
-		state.worldMap.put(Location.WHITE_ROOM, whiteRoom);
-		state.worldMap.put(Location.BLUE_ROOM, blueRoom);
-		state.worldMap.put(Location.MAGIC_ROOM, magicRoom);
+		
 
 
 
@@ -400,7 +436,7 @@ public final class Game {
 
 		// Beginning text of the game.
 		outputLine();
-		output(StringList.GAME_INTRO);
+		output(GameStrings.GAME_INTRO);
 		
 	}
 
@@ -690,7 +726,7 @@ public final class Game {
 				{
 					if (d.name.equals(objDoor))
 					{
-						d.unlock(indItem);
+						d.unlock();
 						d.open();
 					}
 					
@@ -704,7 +740,7 @@ public final class Game {
 				{
 					if (d.name.equals(objDoor))
 					{
-						d.lock(indItem);
+						d.lock();
 						d.close();
 					}
 				}

@@ -21,10 +21,7 @@ class Feature extends GameObject {
 		super(name, loc);
 	}
 
-	public Feature(String name, Location loc, ActivateMethod am)
-	{
-		super(name, loc, am);
-	}	
+	
 
 }
 

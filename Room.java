@@ -87,7 +87,6 @@ class Room {
 		Door d = null;
 		boolean result = false;
 		Location dest = Location.NULL_LOCATION;
-		String failString = StringList.CANT_GO;
 
 
 		// Identify which direction the player is trying to go.
@@ -105,7 +104,7 @@ class Room {
 		if (d.name.equals("null"))
 		{
 			result = false;
-			Game.output(failString);
+			Game.output(GameStrings.CANT_GO);
 		}
 
 
@@ -128,13 +127,13 @@ class Room {
 				// If the door is locked, print the door's locked message.
 				if (d.isLocked())
 				{
-					Game.output("The door is locked.");
+					Game.output(d.lockFail);
 				}
 
 				// If the door is closed, but not locked.
 				else
 				{
-					Game.output("The door is closed.");
+					Game.output(d.closedFail);
 				}
 			}
 			
