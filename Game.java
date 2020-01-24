@@ -17,11 +17,6 @@ enum Location {
 
 	}
 
-enum ActionType {
-
-	BLANK
-
-}
 
 enum Action {
 
@@ -79,7 +74,6 @@ public final class Game {
 	private static HashMap<String, Action> commandOne = new HashMap<String, Action>();
 	private static HashMap<String, Action> commandTwo = new HashMap<String, Action>();
 	private static HashMap<String, Action> commandThree = new HashMap<String, Action>();
-	private static HashMap<String, String> actionObjects = new HashMap<String, String>();
 
 	private static ArrayList<String> fakeItems = new ArrayList<String>();
 
@@ -167,15 +161,6 @@ public final class Game {
 	
 		state.actorList.put(wizard.name, wizard);
 
-		actionObjects.put(itemRope.name, "item");
-		actionObjects.put(itemEgg.name, "item");
-		actionObjects.put(itemNote.name, "item");
-		actionObjects.put(itemMagKey.name, "item");
-		actionObjects.put(bell.name, "feature");
-		actionObjects.put(piano.name, "feature");
-		actionObjects.put(wizard.name, "actor");
-		actionObjects.put("door", "door");
-		actionObjects.put("magicdoor", "door");
 
 
 		
@@ -235,7 +220,7 @@ public final class Game {
 
 		ActivateMethod ringBell = () -> 
 		{ 
-			Action act = state.currentAction;
+			Action act = state.playerAction;
 
 			switch (act)
 			{
@@ -261,7 +246,7 @@ public final class Game {
 
 				case TIE:
 				{
-					if (state.indirectObject.name.equals("rope"))
+					if (state.usedItem.name.equals("rope"))
 					{
 						output(GameStrings.BELL_ROPE_TIE);
 						Item it = state.itemList.get("rope");
@@ -287,7 +272,7 @@ public final class Game {
 
 		ActivateMethod readNote = () ->
 		{
-			Action act = state.currentAction;
+			Action act = state.playerAction;
 
 			switch (act)
 			{
@@ -304,7 +289,7 @@ public final class Game {
 
 		ActivateMethod playPiano = () ->
 		{
-			Action act = state.currentAction;
+			Action act = state.playerAction;
 
 			switch (act)
 			{
@@ -335,7 +320,7 @@ public final class Game {
 
 		ActivateMethod wizardMethod = () ->
 		{
-			Action act = state.currentAction;
+			Action act = state.playerAction;
 
 			switch (act)
 			{
@@ -365,7 +350,7 @@ public final class Game {
 
 		ActivateMethod openMagicDoor = () -> 
 		{
-			Item it = state.indirectObject;
+			Item it = state.usedItem;
 			
 			if (it.name == itemMagKey.name)
 			{
@@ -415,6 +400,7 @@ public final class Game {
 		bell.setMethod(ringBell);
 		piano.setMethod(playPiano);
 		itemNote.setMethod(readNote);
+		magDoorFeature.setMethod(openMagicDoor);
 		wizard.setMethod(wizardMethod);
 		wizard.setActorMethod(wizardAct);
 
@@ -522,7 +508,7 @@ public final class Game {
 			return false;
 		}
 
-		state.currentAction = act;
+		state.playerAction = act;
 
 		switch(state.numInputWords)
 		{
@@ -535,49 +521,43 @@ public final class Game {
 			case 2:
 			case 3:
 			{
-				if (!actionObjects.containsKey(second))
+
+				if (state.featureList.containsKey(second))
+				// if (actionObjects.get(second).equals("feature"))
+				{
+					state.objectFeature = state.featureList.get(second);
+				}
+
+				else if (state.itemList.containsKey(second))
+				//if (actionObjects.get(second).equals("item"))
+				{
+					state.objectItem = state.itemList.get(second);
+				}
+
+				else if (state.actorList.containsKey(second))
+				//if (actionObjects.get(second).equals("actor"))
+				{
+					state.objectActor = state.actorList.get(second);
+				}
+				
+				else 
 				{
 					output("I don't know what \"" + second + "\" means.");
 					return false;
 				}
 
+				if (!third.isEmpty() && state.itemList.containsKey(third))
+				{
 				
-				if (actionObjects.get(second).equals("feature"))
-				{
-					state.objectFeature = state.featureList.get(second);
-				}
-
-				if (actionObjects.get(second).equals("item"))
-				{
-					state.objectItem = state.itemList.get(second);
-				}
-
-				if (actionObjects.get(second).equals("actor"))
-				{
-					state.objectActor = state.actorList.get(second);
-				}
-
-				if (actionObjects.get(second).equals("door"))
-				{
-					state.objectDoor = second;
-				}
-				
-
-				if (!third.isEmpty() && actionObjects.containsKey(third))
-				{
-					if (actionObjects.get(third).equals("item"))
+					Item it = state.itemList.get(third);
+					if (it.getLocation() != Location.PLAYER_INVENTORY)
 					{
-						Item it = state.itemList.get(third);
-						if (it.getLocation() != Location.PLAYER_INVENTORY)
-						{
-							output("You're not carrying the " + it.name + ".");
-							return false;
-						}
-
-						state.indirectObject = it;
-
-
+						output("You're not carrying the " + it.name + ".");
+						return false;
 					}
+
+					state.usedItem = it;
+
 				}
 			
 			} break;
@@ -603,23 +583,24 @@ public final class Game {
 		Location curLoc = state.getPlayerLocation();
 		Room curRoom = state.worldMap.get(curLoc);
 
-		Action curAction = state.getCurrentAction();
+		Action curAction = state.getPlayerAction();
 
 		Feature objFeature = state.objectFeature;
 		Item objItem = state.objectItem;
 		Actor objActor = state.objectActor;
-		String objDoor = state.objectDoor;
 
-		Item indItem = state.indirectObject;
+		Item indItem = state.usedItem;
 
-		/*
-		output("Selection action is " + curAction);
-		output("Selected feature is " + objFeature.name);
-		output("Selected item is " + objItem.name);
-		output("Selected actor is " + objActor.name);
-		output("Selected door is " + objDoor);
-		output("Indirect object is " + indItem.name);
-		*/
+		// For testing
+		if (false)
+		{
+			output("Selection action is " + curAction);
+			output("Selected feature is " + objFeature.name);
+			output("Selected item is " + objItem.name);
+			output("Selected actor is " + objActor.name);
+			output("Indirect object is " + indItem.name);
+		}
+		
 
 
 
@@ -636,6 +617,7 @@ public final class Game {
 			case TIE:
 			case ATTACK:
 			case HIGH_FIVE:
+			case OPEN:
 			{
 				if (!objFeature.name.equals("null"))
 				{
@@ -716,33 +698,6 @@ public final class Game {
 				{
 					if (it.getLocation() == Location.PLAYER_INVENTORY)
 						output(it.name);
-				}
-			} break;
-
-			case OPEN:
-			case UNLOCK:
-			{
-				for (Door d : curRoom.exits)
-				{
-					if (d.name.equals(objDoor))
-					{
-						d.unlock();
-						d.open();
-					}
-					
-				}
-			
-			} break;
-
-			case LOCK:
-			{
-				for (Door d : curRoom.exits)
-				{
-					if (d.name.equals(objDoor))
-					{
-						d.lock();
-						d.close();
-					}
 				}
 			} break;
 

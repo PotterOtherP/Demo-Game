@@ -12,9 +12,9 @@ class GameState {
 
 
 	// player attributes
-	private Location playerLocation;
-	private Location playerPreviousLocation;
-	private int playerHitPoints;
+	public Location playerLocation;
+	public Location playerPreviousLocation;
+	public int playerHitPoints;
 
 
 	// player action
@@ -24,14 +24,11 @@ class GameState {
 	public int numInputWords;
 
 
-	public Action currentAction;
-	public ActionType currentActionType;
+	public Action playerAction;
 	public Feature objectFeature;
 	public Actor objectActor;
 	public Item objectItem;
-	public String objectDoor;
-
-	public Item indirectObject;
+	public Item usedItem;
 	public String speechText;
 
 	public Feature dummyFeature;
@@ -76,8 +73,8 @@ class GameState {
 	public void setPreviousLocation(Location loc) { playerPreviousLocation = loc; }
 	public Location getPreviousLocation() { return playerPreviousLocation; }
 
-	public void setCurrentAction(Action act) { currentAction = act; }
-	public Action getCurrentAction() { return currentAction; }
+	public void setPlayerAction(Action act) { playerAction = act; }
+	public Action getPlayerAction() { return playerAction; }
 
 
 
@@ -88,13 +85,11 @@ class GameState {
 		this.third = "";
 		this.numInputWords = 0;
 
-		this.currentAction = Action.NULL_ACTION;
-		this.currentActionType = ActionType.BLANK;
+		this.playerAction = Action.NULL_ACTION;
 		this.objectFeature = dummyFeature;
 		this.objectItem = dummyItem;
 		this.objectActor = dummyActor;
-		this.objectDoor = "";
-		this.indirectObject = dummyItem;
+		this.usedItem = dummyItem;
 	}
 
 
