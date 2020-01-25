@@ -14,13 +14,28 @@ class GameStrings {
 
 
 	public static final String MAGICDOOR_LOCKED = "The large stone door is locked.";
+	public static final String MAGICDOOR_OPEN = "You unlock the door with the key!";
+	public static final String MAGICDOOR_ACTION_FAIL = "That's not something you can do to the door.";
+	public static final String MAGICDOOR_KICK = "You consider kicking the door, but you'd rather not break your toes.";
 	public static final String CANT_GO = "You can't go that way.";
 
+	public static final String BELL_RING = "Ding dong ding dong!";
+	public static final String BELL_KICK = "BWWWOOONG!! Ow!";
+	public static final String BELL_NOTE_FALL = "A note falls out of the bell!";
 	public static final String BELL_RING_FAIL = "The bell ringer is too heavy for you to move with your bare hands."
 		+ "\nYou need some kind of leverage.";
 	public static final String BELL_ROPE_TIE = "You tie the rope to the bell's lever, leaving several feet for you to pull.";
 	public static final String BELL_ROPE_TIE_FAIL = "You can't tie that to the bell.";
-	public static final String NOTE_TEXT = "It might seem odd, but sometimes a key can be found inside an egg. But how does one open such an egg?";
+	public static final String BELL_ACTION_FAIL = "That's not something you can do to the bell.";
+	public static final String NOTE_TEXT = "The note says:"
+		+ "\nIt may seem odd, but sometimes playing a piano will do something to an egg.";
+	public static final	String NOTE_ACTION_FAIL = "You can't do that to the note.";
+
+	public static final	String PIANO_ACTION_FAIL = "You can't do that to the piano.";
+	public static final	String PIANO_KICK = "That's not something you should do to this nice piano.";
+	public static final	String PIANO_PLAY = "Da-da Da-da Da Da-da-da DUNNN...";
+	public static final	String PIANO_EGG = "The egg cracks open, revealing a key!";
+
 
 
 
@@ -29,8 +44,16 @@ class GameStrings {
 	public static final String WIZARD_THREE = "The wizard hops back and forth on one foot.";
 	public static final String WIZARD_FOUR = "The wizard teleports across the room in a puff of smoke!";
 	public static final String WIZARD_FIVE = "The wizard raises his hand with his palm toward you.";
+	public static final String WIZARD_ATTACK = "The wizard easily evades your feeble attempts at violence.";
 	public static final String WIZARD_HIGHFIVE = "You slap the wizard's open hand! The wizard cackles with glee and disappears in a clap of smoke.";
 	public static final String HIGHFIVE_FAIL = "You can't high five the wizard when he's not holding his hand up!";
+	public static final String WIZARD_ACTION_FAIL = "Whatever you're trying to do to the wizard, that won't work.";
+
+
+
+	public static final String PROFANITY_ONE = "There's no need for that kind of language.";
+	public static final String PROFANITY_TWO = "Do you have to use so many cuss words?";
+
 
 	public static final String GAME_WON = "You won the game!";
 

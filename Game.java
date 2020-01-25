@@ -84,6 +84,7 @@ public final class Game {
 	{
 
 		GameState gameState = new GameState();
+		String playerText = "";
 
 		
 		initGame(gameState);
@@ -93,7 +94,8 @@ public final class Game {
 
 		while (!gameover)
 		{	
-			parsePlayerInput(gameState);
+			playerText = getPlayerText();
+			parsePlayerInput(gameState, playerText);
 			if (validateAction(gameState))
 			{
 				updateGame(gameState);
@@ -211,10 +213,9 @@ public final class Game {
 
         fakeItems.add("juniper");
 
-        ActivateMethod ringBell = (GameState gs) -> 
+        ActivateMethod ringBell = (GameState gs, Action act) -> 
         { 
-            Action act = gs.playerAction;
-
+            
             switch (act)
             {
                 case RING:
@@ -225,13 +226,13 @@ public final class Game {
                         return;
                     }
 
-                    output("Ding dong ding dong!");
+                    output(GameStrings.BELL_RING);
 
                     if (!gs.bellRung)
                     {
                         Item it = gs.itemList.get("note");
                         it.setLocation(Location.BLACK_ROOM);
-                        output("A note falls out of the bell!");
+                        output(GameStrings.BELL_NOTE_FALL);
                         gs.bellRung = true;
                     }
 
@@ -245,6 +246,7 @@ public final class Game {
                         Item it = gs.itemList.get("rope");
                         it.setLocation(Location.BLACK_ROOM);
                         gs.bellRopeTied = true;
+                        // TODO: can we untie the rope?
                     }
                     else
                     {
@@ -254,48 +256,51 @@ public final class Game {
 
                 case KICK:
                 {
-                    output("BWWWOOONG!! Ow!");
+                    output(GameStrings.BELL_KICK);
                 } break;
 
-                default: {} break;
+                default:
+                {
+                	output(GameStrings.BELL_ACTION_FAIL);
+                } break;
 
             }
 
         };
 
 
-		ActivateMethod readNote = (GameState gs) ->
+		ActivateMethod readNote = (GameState gs, Action act) ->
 		{
-			Action act = gs.playerAction;
-
+			
 			switch (act)
 			{
 				case READ:
 				{
-					output("The note says: ");
-					output("It may seem odd, but sometimes playing a piano will do something to an egg.");
+					output(GameStrings.NOTE_TEXT);
 				} break;
 
-				default: {} break;
+				default:
+				{
+					output(GameStrings.NOTE_ACTION_FAIL);
+				} break;
 			}
 
 		};
 
-		ActivateMethod playPiano = (GameState gs) ->
+		ActivateMethod playPiano = (GameState gs, Action act) ->
 		{
-			Action act = gs.playerAction;
-
+			
 			switch (act)
 			{
 				case PLAY:
 				{
-					output("Da-da Da-da Da Da-da-da DUNNN...");
+					output(GameStrings.PIANO_PLAY);
 					Item it = gs.itemList.get("egg");
 					if (it.getLocation() == Location.PLAYER_INVENTORY)
 					{
 						if (!gs.eggOpened)
 						{
-							output("The egg cracks open, revealing a key!");
+							output(GameStrings.PIANO_EGG);
 							it = gs.itemList.get("key");
 							it.setLocation(Location.PLAYER_INVENTORY);
 						}
@@ -305,23 +310,25 @@ public final class Game {
 
 				case KICK:
 				{
-					output("That's not something you should do to this nice piano.");
+					output(GameStrings.PIANO_KICK);
 				} break;
 
-				default: {} break;
+				default:
+				{
+					output(GameStrings.PIANO_ACTION_FAIL);
+				} break;
 			}
 		};
 
-		ActivateMethod wizardMethod = (GameState gs) ->
+		ActivateMethod wizardMethod = (GameState gs, Action act) ->
 		{
-			Action act = gs.playerAction;
-
+			
 			switch (act)
 			{
 				case ATTACK:
 				case KICK:
 				{
-					output("The wizard easily evades your feeble attempts at violence.");
+					output(GameStrings.WIZARD_ATTACK);
 				} break;
 
 				case HIGH_FIVE:
@@ -338,25 +345,46 @@ public final class Game {
 					}
 				} break;
 
-				default: {} break;
+				default:
+				{
+					output(GameStrings.WIZARD_ACTION_FAIL);
+				} break;
 			}
 		};
 
-		ActivateMethod openMagicDoor = (GameState gs) -> 
+		ActivateMethod openMagicDoor = (GameState gs, Action act) -> 
 		{
-			Item it = gs.usedItem;
+			switch (act)
+			{
+				case OPEN:
+				case UNLOCK:
+				{
+					Item it = gs.usedItem;
 			
-			if (it.name == itemMagKey.name)
-			{
-				output("You unlock the door with the key.");
-				magicDoor.unlock();
-				magicDoor.open();
-			}
+					if (it.name == itemMagKey.name)
+					{
+						output(GameStrings.MAGICDOOR_OPEN);
+						magicDoor.unlock();
+						magicDoor.open();
+					}
 
-			else
-			{
-				output(magicDoor.lockFail);
-			}
+					else
+					{
+						output(magicDoor.lockFail);
+					}
+				} break;
+
+				case KICK:
+				{
+					output(GameStrings.MAGICDOOR_KICK);
+				} break;
+
+				default:
+				{
+					output(GameStrings.MAGICDOOR_ACTION_FAIL);
+				} break;
+				
+			}		
 		};
 
 
@@ -423,7 +451,7 @@ public final class Game {
 
 
 
-	private static void parsePlayerInput(GameState state)
+	private static void parsePlayerInput(GameState state, String playerText)
 	{
 
 		/* Takes whatever the player entered and sets three strings in the gamestate:
@@ -434,7 +462,6 @@ public final class Game {
 
 		state.resetInput();
 
-		String playerText = getPlayerText();
 		String[] words = playerText.split(" ");
 
 		String arg1 = "";
@@ -503,6 +530,24 @@ public final class Game {
 		}
 
 		state.playerAction = act;
+
+
+		if (commandTwo.containsKey(first) && second.isEmpty())
+		{
+			output("What do you want to " + first + "?");
+			String input = getPlayerText();
+			String[] addInput = input.split(" ");
+			if (addInput.length == 1)
+			{
+				second = input;
+				state.numInputWords = 2;
+			}
+			else
+			{
+				parsePlayerInput(state, input);
+				return validateAction(state);
+			}
+		}
 
 		switch(state.numInputWords)
 		{
@@ -616,7 +661,7 @@ public final class Game {
 				if (!objFeature.name.equals("null"))
 				{
 					if (objFeature.location == curLoc)
-						objFeature.activate(state);
+						objFeature.activate(state, curAction);
 					else
 						output("There's no " + objFeature.name + " here.");
 				}
@@ -624,7 +669,7 @@ public final class Game {
 				if (!objActor.name.equals("null"))
 				{
 					if (objActor.location == curLoc)
-						objActor.activate(state);
+						objActor.activate(state, curAction);
 					else
 						output("There's no " + objActor.name + " here.");
 				}
@@ -632,7 +677,7 @@ public final class Game {
 				if (!objItem.name.equals("null"))
 				{
 					if (objItem.getLocation() == Location.PLAYER_INVENTORY)
-						objItem.activate(state);
+						objItem.activate(state, curAction);
 					else
 						output("You're not carrying the " + objItem.name + ".");
 				}
@@ -656,21 +701,19 @@ public final class Game {
                     output("That's not something you can take.");
                     return;
                 }
+
+                if (objItem.getLocation() == Location.PLAYER_INVENTORY)
+				{
+					output("You're already carrying the " + objItem.name + "!");
+					return;
+				}
 				
 				if (objItem.getLocation() == curLoc)
 				{
-					if (objItem.getLocation() == Location.PLAYER_INVENTORY)
-					{
-						output("You're already carrying the " + objItem.name);
-						return;
-					}
-					else
-					{
-						objItem.setLocation(Location.PLAYER_INVENTORY);
-						output("You picked up the " + objItem.name + ".");
-						
-					}
-				}				
+					objItem.setLocation(Location.PLAYER_INVENTORY);
+					output("You picked up the " + objItem.name + ".");
+				}
+
 				else
 				{
 					output("There's no " + objItem.name + " here.");
@@ -733,7 +776,7 @@ public final class Game {
 			case SHOUT: { output("Yaaaaarrrrggghhh!"); } break;
 			case NULL_ACTION: {} break;
 			case VERBOSE: { output("You said too many words."); } break;
-			case PROFANITY: { output("There's no need for that kind of language."); } break;			
+			case PROFANITY: { output(GameStrings.PROFANITY_ONE); } break;			
 			case QUIT: { /* if (verifyQuit()) */ gameover = true; } break;
 
 			default: {} break;
