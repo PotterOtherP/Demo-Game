@@ -61,12 +61,24 @@ enum Action {
 
 
 
-
-
-
+/**
+ * This is a demo of a text-based adventure game, modeled after the original Zork.
+ * The purpose of this is to demonstrate the features that could be expanded
+ * into a full-length game of arbitrary size and complexity.
+ *
+ * @author Nathan Tryon January 2020
+ */
 public final class Game {
 
+	/*
+		TODO: To complete the demo.
 
+		 - Solve the issue of tying and untying the rope to the bell. Refactor item objects?
+		 - For the demo, hacks will be good enough.
+		 - Handle ambiguous commands and object words
+		 - Prompt user for incomplete three-word commands
+		 - Create dictionaries to parse user input as tokens of one or more words.
+	*/
 
 	private static boolean gameover = true;
 	private static boolean godmode = false;
@@ -246,7 +258,6 @@ public final class Game {
                         Item it = gs.itemList.get("rope");
                         it.setLocation(Location.BLACK_ROOM);
                         gs.bellRopeTied = true;
-                        // TODO: can we untie the rope?
                     }
                     else
                     {

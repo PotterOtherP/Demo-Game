@@ -39,7 +39,7 @@ class GameStrings {
 
 
 
-	public static final String WIZARD_ONE = "Yer a wizard Harry!";
+	public static final String WIZARD_ONE = "The wizard adjusts his shiny purple hat with moons and stars on it and his emerald robe.";
 	public static final String WIZARD_TWO = "The wizard snorts and picks his nose.";
 	public static final String WIZARD_THREE = "The wizard hops back and forth on one foot.";
 	public static final String WIZARD_FOUR = "The wizard teleports across the room in a puff of smoke!";
