@@ -111,15 +111,10 @@ public final class Game {
 	private static void initGame(GameState state)
 	{	
 		// Create all the objects first, then the lists, then the methods
-
-
-
 		Feature nullFeature = new Feature();
 		Feature bell = new Feature("bell", Location.BLACK_ROOM);
 		Feature piano = new Feature("piano", Location.WHITE_ROOM);
 		Feature magDoorFeature = new Feature("door", Location.BLACK_ROOM);
-
-
 
 		Item nullItem = new Item();
 		Item itemRope = new Item("rope", Location.GREEN_ROOM);
@@ -160,10 +155,6 @@ public final class Game {
 		state.featureList.put(magDoorFeature.name, magDoorFeature);
 	
 		state.actorList.put(wizard.name, wizard);
-
-
-
-		
 
 		state.worldMap.put(Location.RED_ROOM, redRoom);
 		state.worldMap.put(Location.GREEN_ROOM, greenRoom);
@@ -218,61 +209,64 @@ public final class Game {
 		commandThree.put("lock", Action.LOCK);
 		commandThree.put("tie", Action.TIE);
 
-		ActivateMethod ringBell = () -> 
-		{ 
-			Action act = state.playerAction;
+        fakeItems.add("juniper");
 
-			switch (act)
-			{
-				case RING:
-				{
-					if (!state.bellRopeTied)
-					{
-						output(GameStrings.BELL_RING_FAIL);
-						return;
-					}
+        ActivateMethod ringBell = (GameState gs) -> 
+        { 
+            Action act = gs.playerAction;
 
-					output("Ding dong ding dong!");
+            switch (act)
+            {
+                case RING:
+                {
+                    if (!gs.bellRopeTied)
+                    {
+                        output(GameStrings.BELL_RING_FAIL);
+                        return;
+                    }
 
-					if (!state.bellRung)
-					{
-						Item it = state.itemList.get("note");
-						it.setLocation(Location.BLACK_ROOM);
-						output("A note falls out of the bell!");
-						state.bellRung = true;
-					}
+                    output("Ding dong ding dong!");
 
-				} break;
+                    if (!gs.bellRung)
+                    {
+                        Item it = gs.itemList.get("note");
+                        it.setLocation(Location.BLACK_ROOM);
+                        output("A note falls out of the bell!");
+                        gs.bellRung = true;
+                    }
 
-				case TIE:
-				{
-					if (state.usedItem.name.equals("rope"))
-					{
-						output(GameStrings.BELL_ROPE_TIE);
-						Item it = state.itemList.get("rope");
-						it.setLocation(Location.BLACK_ROOM);
-						state.bellRopeTied = true;
-					}
-					else
-					{
-						output(GameStrings.BELL_ROPE_TIE_FAIL);
-					}
-				} break;
+                } break;
 
-				case KICK:
-				{
-					output("BWWWOOONG!! Ow!");
-				} break;
+                case TIE:
+                {
+                    if (gs.usedItem.name.equals("rope"))
+                    {
+                        output(GameStrings.BELL_ROPE_TIE);
+                        Item it = gs.itemList.get("rope");
+                        it.setLocation(Location.BLACK_ROOM);
+                        gs.bellRopeTied = true;
+                    }
+                    else
+                    {
+                        output(GameStrings.BELL_ROPE_TIE_FAIL);
+                    }
+                } break;
 
-				default: {} break;
+                case KICK:
+                {
+                    output("BWWWOOONG!! Ow!");
+                } break;
 
-			}
+                default: {} break;
 
-		};
+            }
 
-		ActivateMethod readNote = () ->
+        };
+
+
+		ActivateMethod readNote = (GameState gs) ->
 		{
-			Action act = state.playerAction;
+			Action act = gs.playerAction;
 
 			switch (act)
 			{
@@ -287,22 +281,22 @@ public final class Game {
 
 		};
 
-		ActivateMethod playPiano = () ->
+		ActivateMethod playPiano = (GameState gs) ->
 		{
-			Action act = state.playerAction;
+			Action act = gs.playerAction;
 
 			switch (act)
 			{
 				case PLAY:
 				{
 					output("Da-da Da-da Da Da-da-da DUNNN...");
-					Item it = state.itemList.get("egg");
+					Item it = gs.itemList.get("egg");
 					if (it.getLocation() == Location.PLAYER_INVENTORY)
 					{
-						if (!state.eggOpened)
+						if (!gs.eggOpened)
 						{
 							output("The egg cracks open, revealing a key!");
-							it = state.itemList.get("key");
+							it = gs.itemList.get("key");
 							it.setLocation(Location.PLAYER_INVENTORY);
 						}
 
@@ -318,9 +312,9 @@ public final class Game {
 			}
 		};
 
-		ActivateMethod wizardMethod = () ->
+		ActivateMethod wizardMethod = (GameState gs) ->
 		{
-			Action act = state.playerAction;
+			Action act = gs.playerAction;
 
 			switch (act)
 			{
@@ -332,7 +326,7 @@ public final class Game {
 
 				case HIGH_FIVE:
 				{
-					if (state.wizardHandUp)
+					if (gs.wizardHandUp)
 					{
 						output(GameStrings.WIZARD_HIGHFIVE);
 						output(GameStrings.GAME_WON);
@@ -348,9 +342,9 @@ public final class Game {
 			}
 		};
 
-		ActivateMethod openMagicDoor = () -> 
+		ActivateMethod openMagicDoor = (GameState gs) -> 
 		{
-			Item it = state.usedItem;
+			Item it = gs.usedItem;
 			
 			if (it.name == itemMagKey.name)
 			{
@@ -405,7 +399,7 @@ public final class Game {
 		wizard.setActorMethod(wizardAct);
 
 
-		
+		// Game objects complete. Start setting up the game
 
 
 
@@ -413,7 +407,7 @@ public final class Game {
 		magicDoor.lock();
 
 
-		fakeItems.add("juniper");
+		
 
 
 		// Put the player in the starting location
@@ -622,7 +616,7 @@ public final class Game {
 				if (!objFeature.name.equals("null"))
 				{
 					if (objFeature.location == curLoc)
-						objFeature.activate();
+						objFeature.activate(state);
 					else
 						output("There's no " + objFeature.name + " here.");
 				}
@@ -630,7 +624,7 @@ public final class Game {
 				if (!objActor.name.equals("null"))
 				{
 					if (objActor.location == curLoc)
-						objActor.activate();
+						objActor.activate(state);
 					else
 						output("There's no " + objActor.name + " here.");
 				}
@@ -638,7 +632,7 @@ public final class Game {
 				if (!objItem.name.equals("null"))
 				{
 					if (objItem.getLocation() == Location.PLAYER_INVENTORY)
-						objItem.activate();
+						objItem.activate(state);
 					else
 						output("You're not carrying the " + objItem.name + ".");
 				}
@@ -657,6 +651,11 @@ public final class Game {
 
 			case TAKE:
 			{
+                if (objItem.name.equals("null"))
+                {
+                    output("That's not something you can take.");
+                    return;
+                }
 				
 				if (objItem.getLocation() == curLoc)
 				{

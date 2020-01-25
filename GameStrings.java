@@ -1,6 +1,6 @@
 class GameStrings {
 	
-	public static final String GAME_INTRO = "Welcome to the cave game.\nYou awaken in a red room.";
+	public static final String GAME_INTRO = "Welcome to the cave game.\nYou awaken in a red room. There are exits in all four directions.";
 	
 	public static final String DESC_RED_ROOM = "This is a red room. There are exits in all four directions.";
 	public static final String DESC_GREEN_ROOM = "This is a green room. There are exits to the east, west, and south.";

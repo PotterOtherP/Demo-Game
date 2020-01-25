@@ -1,6 +1,6 @@
 interface ActivateMethod {
 
-    public void run();
+    public void run(GameState state);
 }
 
 abstract class GameObject {
@@ -14,14 +14,14 @@ abstract class GameObject {
     {
         this.name = "null";
         this.location = Location.NULL_LOCATION;
-        this.method = () -> {};
+        this.method = (GameState state) -> {};
     }
 
     public GameObject(String name)
     {
         this.name = name;
         this.location = Location.NULL_LOCATION;
-        this.method = () -> {};
+        this.method = (GameState state) -> {};
 
     }
 
@@ -29,7 +29,7 @@ abstract class GameObject {
     {
         this.name = name;
         this.location = loc;
-        this.method = () -> {};
+        this.method = (GameState state) -> {};
     }
 
     public void setMethod(ActivateMethod am)
@@ -38,9 +38,9 @@ abstract class GameObject {
     }
 
 
-    public void activate()
+    public void activate(GameState state)
     {
-        method.run();
+        method.run(state);
     }
 
     public boolean vowelStart()
@@ -75,5 +75,9 @@ abstract class GameObject {
 
         return result;
     }
+
+
+
+    
 
 }
