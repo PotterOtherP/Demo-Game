@@ -73,10 +73,10 @@ public final class Game {
 	/*
 		TODO: To complete the demo.
 
-		 - Solve the issue of tying and untying the rope to the bell. Refactor item objects?
-		 - For the demo, hacks will be good enough.
+		 - (DONE) Solve the issue of tying and untying the rope to the bell. Refactor item objects?
+		 - (DONE) For the demo, hacks will be good enough.
 		 - Handle ambiguous commands and object words
-		 - Prompt user for incomplete three-word commands
+		 - (DONE) Prompt user for incomplete three-word commands
 		 - Create dictionaries to parse user input as tokens of one or more words.
 	*/
 
@@ -399,9 +399,6 @@ public final class Game {
 		};
 
 
-		
-
-
 		ActorMethod wizardAct = () ->
 		{
 			Actor self = state.actorList.get("wizard");
@@ -543,6 +540,7 @@ public final class Game {
 		state.playerAction = act;
 
 
+		// Incomplete actions
 		if (commandTwo.containsKey(first) && second.isEmpty())
 		{
 			output("What do you want to " + first + "?");
@@ -557,6 +555,44 @@ public final class Game {
 			{
 				parsePlayerInput(state, input);
 				return validateAction(state);
+			}
+		}
+
+
+		if (commandThree.containsKey(first) && third.isEmpty())
+		{
+
+			if (second.isEmpty())
+			{
+				output("What do you want to " + first + "?");
+				String input = getPlayerText();
+				String[] addInput = input.split(" ");
+				if (addInput.length == 1)
+				{
+					second = input;
+					state.numInputWords = 2;
+				}
+				else
+				{
+					parsePlayerInput(state, input);
+					return validateAction(state);
+				}
+			}
+
+			output("What do you want to " + first + " the " + second + " with?");
+			{
+				String input2 = getPlayerText();
+				String[] addInput2 = input2.split(" ");
+				if (addInput2.length == 1)
+				{
+					third = input2;
+					state.numInputWords = 3;
+				}
+				else
+				{
+					parsePlayerInput(state, input2);
+					return validateAction(state);
+				}
 			}
 		}
 
@@ -719,10 +755,15 @@ public final class Game {
 					return;
 				}
 				
+				// Successful take
 				if (objItem.getLocation() == curLoc)
 				{
 					objItem.setLocation(Location.PLAYER_INVENTORY);
 					output("You picked up the " + objItem.name + ".");
+
+					// Special cases where taking items affects the game state
+					if (objItem.name.equals("rope") && state.bellRopeTied)
+						state.bellRopeTied = false;
 				}
 
 				else
