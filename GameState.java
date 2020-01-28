@@ -21,7 +21,7 @@ class GameState {
 	public String first;
 	public String second;
 	public String third;
-	public int numInputWords;
+	public ActionType type;
 
 
 	public Action playerAction;
@@ -83,9 +83,9 @@ class GameState {
 		this.first = "";
 		this.second = "";
 		this.third = "";
-		this.numInputWords = 0;
 
 		this.playerAction = Action.NULL_ACTION;
+		this.type = ActionType.BLANK;
 		this.objectFeature = dummyFeature;
 		this.objectItem = dummyItem;
 		this.objectActor = dummyActor;

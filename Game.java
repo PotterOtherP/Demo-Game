@@ -59,6 +59,14 @@ enum Action {
 
 	}
 
+enum ActionType {
+
+	BLANK,
+	REFLEXIVE,
+	DIRECT,
+	INDIRECT
+}
+
 
 
 /**
@@ -202,9 +210,11 @@ public final class Game {
 		commandOne.put("yell",  Action.SHOUT);
 		commandOne.put("scream",  Action.SHOUT);
 		commandOne.put("highfive", Action.HIGH_FIVE);
+		commandOne.put("high five", Action.HIGH_FIVE);
 		commandOne.put("wait", Action.WAIT);
 
 		commandTwo.put("take", Action.TAKE);
+		commandTwo.put("pick up", Action.TAKE);
 		commandTwo.put("drop", Action.DROP);
 		commandTwo.put("open", Action.OPEN);
 		commandTwo.put("close", Action.CLOSE);
@@ -463,7 +473,7 @@ public final class Game {
 	{
 
 		/* Takes whatever the player entered and sets three strings in the gamestate:
-		   first (action), second (actionable object), third (item).
+		   first (action), second (object 1), third (object 2).
 		   Also sets the number of action arguments (non-empty strings).
 
 		*/
@@ -472,41 +482,138 @@ public final class Game {
 
 		String[] words = playerText.split(" ");
 
+		// Make sure we're deleting the words, not portions of other words...
+		playerText = playerText.replaceAll(" the ", " ");
+		playerText = playerText.replaceAll(" to ", " ");
+		playerText = playerText.replaceAll(" with ", " ");
+
+		// get rid of extra spaces
+		while (playerText.contains("  "))
+		{
+			playerText = playerText.replaceAll("  ", " ");		
+		}
+
+		/* Check for an action. If the action is found, set it and trim it
+		   from the beginning of the string. If not, check if the first word
+		   is recognized by the game.
+
+		*/
+
 		String arg1 = "";
 		String arg2 = "";
 		String arg3 = "";
-		String arg4 = "";
 
-		try { arg1 = words[0]; } catch (Exception e) {}
-		try { arg2 = words[1]; } catch (Exception e) {}
-		try { arg3 = words[2]; } catch (Exception e) {}
-		try { arg4 = words[3]; } catch (Exception e) {}
-
-		if (!arg4.isEmpty() && arg3.equals("with"))
+		for (String token : commandOne.keySet())
 		{
-			arg3 = arg4;
+			if (playerText.startsWith(token))
+			{
+				arg1 = token;
+				state.type = ActionType.REFLEXIVE;
+			}
+		}
+
+		for (String token : commandTwo.keySet())
+		{
+			if (playerText.startsWith(token))
+			{
+				arg1 = token;
+				state.type = ActionType.DIRECT;
+			}
+		}
+
+		for (String token : commandThree.keySet())
+		{
+			if (playerText.startsWith(token))
+			{
+				arg1 = token;
+				state.type = ActionType.INDIRECT;
+			}
+		}
+
+				
+		if (arg1.isEmpty())
+		{
+			arg1 = words[0];
 		}
 
 		state.first = arg1;
+
+		playerText = playerText.substring(arg1.length()).trim();
+		if (playerText.isEmpty()) return;
+
+
+		// Set the second argument
+
+		for (String token : state.featureList.keySet())
+		{
+			if (playerText.startsWith(token))
+				arg2 = token;
+		}
+
+		for (String token : state.itemList.keySet())
+		{
+			if (playerText.startsWith(token))
+				arg2 = token;
+		}
+
+		for (String token : state.actorList.keySet())
+		{
+			if (playerText.startsWith(token))
+				arg2 = token;
+		}
+
+		words = playerText.split(" ");
+		if (arg2.isEmpty())
+		{
+			arg2 = words[0];
+		}
+
 		state.second = arg2;
+		playerText = playerText.substring(arg2.length()).trim();
+		if (playerText.isEmpty()) return;
+
+
+		// Set the third argument
+		
+		for (String token : state.featureList.keySet())
+		{
+			if (playerText.startsWith(token))
+				arg3 = token;
+		}
+
+		for (String token : state.itemList.keySet())
+		{
+			if (playerText.startsWith(token))
+				arg3 = token;
+		}
+
+		for (String token : state.actorList.keySet())
+		{
+			if (playerText.startsWith(token))
+				arg3 = token;
+		}
+
+		words = playerText.split(" ");
+		if (arg3.isEmpty())
+		{
+			arg3 = words[0];
+		}
+
 		state.third = arg3;
-
-		int numWords = 0;
-
-		if(!arg1.isEmpty())
-			++numWords;
-
-		if (!arg2.isEmpty())
-			++numWords;
-
-		if(!arg3.isEmpty())
-			++numWords;
-
-		state.numInputWords = numWords;
+		playerText = playerText.substring(arg3.length()).trim();
+		if (!playerText.isEmpty())
+		{
+			output("I don't know what " + playerText + " means.");
+		}
 
 
 
 
+
+
+		// Testing
+		String testText = (arg1 + " " + arg2 + " " + arg3);
+		output(testText.toUpperCase());
 		
 
 
@@ -549,7 +656,6 @@ public final class Game {
 			if (addInput.length == 1)
 			{
 				second = input;
-				state.numInputWords = 2;
 			}
 			else
 			{
@@ -570,7 +676,6 @@ public final class Game {
 				if (addInput.length == 1)
 				{
 					second = input;
-					state.numInputWords = 2;
 				}
 				else
 				{
@@ -586,7 +691,6 @@ public final class Game {
 				if (addInput2.length == 1)
 				{
 					third = input2;
-					state.numInputWords = 3;
 				}
 				else
 				{
@@ -596,16 +700,20 @@ public final class Game {
 			}
 		}
 
-		switch(state.numInputWords)
+		switch(state.type)
 		{
-			case 1:
+			case BLANK:
+			{
+
+			} break;
+			case REFLEXIVE:
 			{
 
 			} break;
 
 
-			case 2:
-			case 3:
+			case DIRECT:
+			case INDIRECT:
 			{
 
 				if (state.featureList.containsKey(second))
@@ -652,7 +760,6 @@ public final class Game {
 			default:
 			{
 				// we should never be here
-				output("Illegal number of command argments: " + state.numInputWords);
 			} break;
 		}
 
@@ -869,7 +976,7 @@ public final class Game {
 		}
 
 
-		return result.toLowerCase();
+		return result.trim().toLowerCase();
 	}
 
 	protected static boolean verifyQuit()

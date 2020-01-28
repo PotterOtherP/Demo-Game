@@ -39,7 +39,7 @@ class GameStrings {
 
 
 
-	public static final String WIZARD_ONE = "The wizard adjusts his shiny purple hat with moons and stars on it and his emerald robe.";
+	public static final String WIZARD_ONE = "The wizard adjusts his emerald robe and his shiny purple hat with moons and stars.";
 	public static final String WIZARD_TWO = "The wizard snorts and picks his nose.";
 	public static final String WIZARD_THREE = "The wizard hops back and forth on one foot.";
 	public static final String WIZARD_FOUR = "The wizard teleports across the room in a puff of smoke!";
@@ -56,6 +56,9 @@ class GameStrings {
 
 
 	public static final String GAME_WON = "You won the game!";
+
+	// All the words recognized by the game.
+	public static final String[] GAME_WORDS = {};
 
 	// This class does not get instantiated.
 	private GameStrings() {}
