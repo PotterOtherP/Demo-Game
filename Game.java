@@ -53,6 +53,7 @@ enum Action {
 	LOCK,
 	READ,
 	KICK,
+	SLAP,
 
 	ATTACK,
 	TIE
@@ -185,53 +186,10 @@ public final class Game {
 		state.worldMap.put(Location.BLUE_ROOM, blueRoom);
 		state.worldMap.put(Location.MAGIC_ROOM, magicRoom);
 
-		commandOne.put("north", Action.EXIT_NORTH);
-		commandOne.put("n",     Action.EXIT_NORTH);
-		commandOne.put("south", Action.EXIT_SOUTH);
-		commandOne.put("s",     Action.EXIT_SOUTH);
-		commandOne.put("east",  Action.EXIT_EAST);
-		commandOne.put("e",     Action.EXIT_EAST);
-		commandOne.put("west",  Action.EXIT_WEST);
-		commandOne.put("w",     Action.EXIT_WEST);
-		commandOne.put("up",	Action.EXIT_UP);
-		commandOne.put("u",	    Action.EXIT_UP);
-		commandOne.put("down",  Action.EXIT_DOWN);
-		commandOne.put("d",     Action.EXIT_DOWN);
-		commandOne.put("quit",  Action.QUIT);
-		commandOne.put("q",     Action.QUIT);
-		commandOne.put("jump",  Action.JUMP);
-		commandOne.put("look",  Action.LOOK);
-		commandOne.put("l",     Action.LOOK);
-		commandOne.put("inventory", Action.INVENTORY);
-		commandOne.put("i",         Action.INVENTORY);
-		commandOne.put("fuck",  Action.PROFANITY);
-		commandOne.put("shit",  Action.PROFANITY);
-		commandOne.put("shout", Action.SHOUT);
-		commandOne.put("yell",  Action.SHOUT);
-		commandOne.put("scream",  Action.SHOUT);
-		commandOne.put("highfive", Action.HIGH_FIVE);
-		commandOne.put("high five", Action.HIGH_FIVE);
-		commandOne.put("wait", Action.WAIT);
+		createActions();
 
-		commandTwo.put("take", Action.TAKE);
-		commandTwo.put("pick up", Action.TAKE);
-		commandTwo.put("drop", Action.DROP);
-		commandTwo.put("open", Action.OPEN);
-		commandTwo.put("close", Action.CLOSE);
-		commandTwo.put("lock", Action.LOCK);
-		commandTwo.put("say", Action.SPEAK);
-		commandTwo.put("ring", Action.RING);
-		commandTwo.put("play", Action.PLAY);
-		commandTwo.put("read", Action.READ);
-		commandTwo.put("kick", Action.KICK);
-		commandTwo.put("hit", Action.ATTACK);
-		commandTwo.put("attack", Action.ATTACK);
-		commandTwo.put("punch", Action.ATTACK);
-
-		commandThree.put("open", Action.OPEN);
-		commandThree.put("unlock", Action.UNLOCK);
-		commandThree.put("lock", Action.LOCK);
-		commandThree.put("tie", Action.TIE);
+		for (String tok : commandOne.keySet())
+			output(tok);
 
         fakeItems.add("juniper");
 
@@ -466,7 +424,98 @@ public final class Game {
 		
 	}
 
+	private static void createActions()
+	{
+		commandOne.put("north", Action.EXIT_NORTH);
+		commandOne.put("go north", Action.EXIT_NORTH);
+		commandOne.put("walk north", Action.EXIT_NORTH);
+		commandOne.put("exit north", Action.EXIT_NORTH);
+		commandOne.put("n",     Action.EXIT_NORTH);
+		commandOne.put("go n", Action.EXIT_NORTH);
+		commandOne.put("walk n", Action.EXIT_NORTH);
+		commandOne.put("exit n", Action.EXIT_NORTH);
 
+		commandOne.put("south", Action.EXIT_SOUTH);
+		commandOne.put("go south", Action.EXIT_SOUTH);
+		commandOne.put("walk south", Action.EXIT_SOUTH);
+		commandOne.put("exit south", Action.EXIT_SOUTH);
+		commandOne.put("s",     Action.EXIT_SOUTH);
+		commandOne.put("go s",     Action.EXIT_SOUTH);
+		commandOne.put("walk s",     Action.EXIT_SOUTH);
+		commandOne.put("exit s",     Action.EXIT_SOUTH);
+
+		commandOne.put("east",  Action.EXIT_EAST);
+		commandOne.put("e",     Action.EXIT_EAST);
+		commandOne.put("go east",  Action.EXIT_EAST);
+		commandOne.put("walk east",  Action.EXIT_EAST);
+		commandOne.put("exit east",  Action.EXIT_EAST);
+		commandOne.put("go e",     Action.EXIT_EAST);
+		commandOne.put("walk e",     Action.EXIT_EAST);
+		commandOne.put("exit e",     Action.EXIT_EAST);
+
+		commandOne.put("west",  Action.EXIT_WEST);
+		commandOne.put("go west",  Action.EXIT_WEST);
+		commandOne.put("walk west",  Action.EXIT_WEST);
+		commandOne.put("exit west",  Action.EXIT_WEST);
+		commandOne.put("w",     Action.EXIT_WEST);
+		commandOne.put("go w",     Action.EXIT_WEST);
+		commandOne.put("walk w",     Action.EXIT_WEST);
+		commandOne.put("exit w",     Action.EXIT_WEST);
+
+		commandOne.put("up",	Action.EXIT_UP);
+		commandOne.put("go up",	Action.EXIT_UP);
+		commandOne.put("exit up",	Action.EXIT_UP);
+		commandOne.put("u",	    Action.EXIT_UP);
+		commandOne.put("go u",	    Action.EXIT_UP);
+		commandOne.put("exit u",	    Action.EXIT_UP);
+
+		commandOne.put("down",  Action.EXIT_DOWN);
+		commandOne.put("go down",  Action.EXIT_DOWN);
+		commandOne.put("exit down",  Action.EXIT_DOWN);
+		commandOne.put("d",     Action.EXIT_DOWN);
+		commandOne.put("go d",     Action.EXIT_DOWN);
+		commandOne.put("exit d",     Action.EXIT_DOWN);
+
+		commandOne.put("quit",  Action.QUIT);
+		commandOne.put("q",     Action.QUIT);
+		commandOne.put("jump",  Action.JUMP);
+
+		commandOne.put("look",  Action.LOOK);
+		commandOne.put("look around",  Action.LOOK);
+		commandOne.put("l",     Action.LOOK);
+
+		commandOne.put("inventory", Action.INVENTORY);
+		commandOne.put("i",         Action.INVENTORY);
+		commandOne.put("fuck",  Action.PROFANITY);
+		commandOne.put("shit",  Action.PROFANITY);
+		commandOne.put("shout", Action.SHOUT);
+		commandOne.put("yell",  Action.SHOUT);
+		commandOne.put("scream",  Action.SHOUT);
+		commandOne.put("highfive", Action.HIGH_FIVE);
+		commandOne.put("high five", Action.HIGH_FIVE);
+		commandOne.put("wait", Action.WAIT);
+
+		commandTwo.put("take", Action.TAKE);
+		commandTwo.put("pick up", Action.TAKE);
+		commandTwo.put("drop", Action.DROP);
+		commandTwo.put("open", Action.OPEN);
+		commandTwo.put("close", Action.CLOSE);
+		commandTwo.put("lock", Action.LOCK);
+		commandTwo.put("say", Action.SPEAK);
+		commandTwo.put("ring", Action.RING);
+		commandTwo.put("play", Action.PLAY);
+		commandTwo.put("read", Action.READ);
+		commandTwo.put("kick", Action.KICK);
+		commandTwo.put("hit", Action.ATTACK);
+		commandTwo.put("attack", Action.ATTACK);
+		commandTwo.put("punch", Action.ATTACK);
+		commandTwo.put("slap", Action.SLAP);
+
+		commandThree.put("open", Action.OPEN);
+		commandThree.put("unlock", Action.UNLOCK);
+		commandThree.put("lock", Action.LOCK);
+		commandThree.put("tie", Action.TIE);
+	}
 
 
 	private static void parsePlayerInput(GameState state, String playerText)

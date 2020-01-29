@@ -58,7 +58,15 @@ class GameStrings {
 	public static final String GAME_WON = "You won the game!";
 
 	// All the words recognized by the game.
-	public static final String[] GAME_WORDS = {};
+	public static final String[] GAME_WORDS = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", 
+	"k", "l", "m", "n", "o", "p", "q", "r", "s", "t",
+	"u", "v", "w", "x", "y", "z", "an", "around", "at", "attach", "attack",
+	"bell", "close", "door", "down", "drop", "east", "egg", "exit", "five",
+	"fuck", "go", "hand", "high", "highfive", "hit", "inventory", "jump", "juniper",
+	"key", "kick", "lock", "look", "north", "note", "open", "passage", "piano", "pick",
+	"play", "pull", "punch", "quit", "read", "ring", "room", "rope", "say", "scream",
+	"shit", "shout", "slap", "south", "take", "the", "tie", "unlock", "up", "wait",
+	"walk", "west", "with", "wizard", "yell"};
 
 	// This class does not get instantiated.
 	private GameStrings() {}
