@@ -86,7 +86,7 @@ public final class Game {
 		 - (DONE) For the demo, hacks will be good enough.
 		 - Handle ambiguous commands and object words
 		 - (DONE) Prompt user for incomplete three-word commands
-		 - Create dictionaries to parse user input as tokens of one or more words.
+		 - (DONE) Create dictionaries to parse user input as tokens of one or more words.
 	*/
 
 	private static boolean gameover = true;
@@ -188,8 +188,6 @@ public final class Game {
 
 		createActions();
 
-		for (String tok : commandOne.keySet())
-			output(tok);
 
         fakeItems.add("juniper");
 
@@ -245,6 +243,30 @@ public final class Game {
 
             }
 
+        };
+
+        ActivateMethod tieRope = (GameState gs, Action act) ->
+        {
+        	Item self = gs.itemList.get("rope");
+
+        	switch (act)
+        	{
+        		case TIE:
+        		{
+        			if (gs.objectFeature.name.equals("bell"))
+        			{
+        				output(GameStrings.BELL_ROPE_TIE);
+                        self.setLocation(Location.BLACK_ROOM);
+                        gs.bellRopeTied = true;
+        				
+        			}
+        		} break;
+
+        		default:
+        		{
+        			output("That's not something you can do with the rope.");
+        		} break;
+        	}
         };
 
 
@@ -398,6 +420,7 @@ public final class Game {
 		bell.setMethod(ringBell);
 		piano.setMethod(playPiano);
 		itemNote.setMethod(readNote);
+		itemRope.setMethod(tieRope);
 		magDoorFeature.setMethod(openMagicDoor);
 		wizard.setMethod(wizardMethod);
 		wizard.setActorMethod(wizardAct);
@@ -491,8 +514,6 @@ public final class Game {
 		commandOne.put("shout", Action.SHOUT);
 		commandOne.put("yell",  Action.SHOUT);
 		commandOne.put("scream",  Action.SHOUT);
-		commandOne.put("highfive", Action.HIGH_FIVE);
-		commandOne.put("high five", Action.HIGH_FIVE);
 		commandOne.put("wait", Action.WAIT);
 
 		commandTwo.put("take", Action.TAKE);
@@ -510,6 +531,8 @@ public final class Game {
 		commandTwo.put("attack", Action.ATTACK);
 		commandTwo.put("punch", Action.ATTACK);
 		commandTwo.put("slap", Action.SLAP);
+		commandTwo.put("highfive", Action.HIGH_FIVE);
+		commandTwo.put("high five", Action.HIGH_FIVE);
 
 		commandThree.put("open", Action.OPEN);
 		commandThree.put("unlock", Action.UNLOCK);
@@ -554,7 +577,8 @@ public final class Game {
 
 		for (String token : commandOne.keySet())
 		{
-			if (playerText.startsWith(token))
+			
+			if (startsWith(token, playerText))
 			{
 				arg1 = token;
 				state.type = ActionType.REFLEXIVE;
@@ -563,7 +587,7 @@ public final class Game {
 
 		for (String token : commandTwo.keySet())
 		{
-			if (playerText.startsWith(token))
+			if (startsWith(token, playerText))
 			{
 				arg1 = token;
 				state.type = ActionType.DIRECT;
@@ -572,7 +596,7 @@ public final class Game {
 
 		for (String token : commandThree.keySet())
 		{
-			if (playerText.startsWith(token))
+			if (startsWith(token, playerText))
 			{
 				arg1 = token;
 				state.type = ActionType.INDIRECT;
@@ -595,19 +619,19 @@ public final class Game {
 
 		for (String token : state.featureList.keySet())
 		{
-			if (playerText.startsWith(token))
+			if (startsWith(token, playerText))
 				arg2 = token;
 		}
 
 		for (String token : state.itemList.keySet())
 		{
-			if (playerText.startsWith(token))
+			if (startsWith(token, playerText))
 				arg2 = token;
 		}
 
 		for (String token : state.actorList.keySet())
 		{
-			if (playerText.startsWith(token))
+			if (startsWith(token, playerText))
 				arg2 = token;
 		}
 
@@ -626,19 +650,19 @@ public final class Game {
 		
 		for (String token : state.featureList.keySet())
 		{
-			if (playerText.startsWith(token))
+			if (startsWith(token, playerText))
 				arg3 = token;
 		}
 
 		for (String token : state.itemList.keySet())
 		{
-			if (playerText.startsWith(token))
+			if (startsWith(token, playerText))
 				arg3 = token;
 		}
 
 		for (String token : state.actorList.keySet())
 		{
-			if (playerText.startsWith(token))
+			if (startsWith(token, playerText))
 				arg3 = token;
 		}
 
@@ -660,9 +684,7 @@ public final class Game {
 
 
 
-		// Testing
-		String testText = (arg1 + " " + arg2 + " " + arg3);
-		output(testText.toUpperCase());
+		
 		
 
 
@@ -1026,6 +1048,24 @@ public final class Game {
 
 
 		return result.trim().toLowerCase();
+	}
+
+	// Checks if "input" starts with "token"
+	private static boolean startsWith(String tok, String inp)
+	{
+		String[] token = tok.split(" ");
+		String[] input  = inp.split(" ");
+
+		if (input.length < token.length)
+			return false;
+
+		for (int i = 0; i < token.length; ++i)
+		{
+			if (!token[i].equals(input[i]))
+				return false;
+		}
+
+		return true;
 	}
 
 	protected static boolean verifyQuit()
