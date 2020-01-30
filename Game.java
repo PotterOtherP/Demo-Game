@@ -31,7 +31,6 @@ enum Action {
 	EXIT_UP,
 	EXIT_DOWN,
 	NULL_ACTION,
-	FAIL_ACTION,
 	GODMODE_TOGGLE,
 	GIBBERISH,
 	QUIT,
@@ -96,7 +95,7 @@ public final class Game {
 	private static HashMap<String, Action> commandTwo = new HashMap<String, Action>();
 	private static HashMap<String, Action> commandThree = new HashMap<String, Action>();
 
-	private static ArrayList<String> fakeItems = new ArrayList<String>();
+	private static ArrayList<String> dictionary = new ArrayList<String>();
 
 	private static Location initialLocation = Location.RED_ROOM;
 
@@ -117,11 +116,8 @@ public final class Game {
 		{	
 			playerText = getPlayerText();
 			parsePlayerInput(gameState, playerText);
-			if (validateAction(gameState))
-			{
-				updateGame(gameState);
-				
-			}
+			validateAction(gameState);
+			updateGame(gameState);
 
 		}
 
@@ -133,7 +129,11 @@ public final class Game {
 
 	private static void initGame(GameState state)
 	{	
-		// Create all the objects first, then the lists, then the methods
+		// Populate the action lists and the dictionary
+		createActions();
+		fillDictionary();
+
+		// Create all the objects, then add them to the lists, then add their methods
 		Feature nullFeature = new Feature();
 		Feature bell = new Feature("bell", Location.BLACK_ROOM);
 		Feature piano = new Feature("piano", Location.WHITE_ROOM);
@@ -189,8 +189,6 @@ public final class Game {
 		createActions();
 
 
-        fakeItems.add("juniper");
-
         ActivateMethod ringBell = (GameState gs, Action act) -> 
         { 
             
@@ -243,30 +241,6 @@ public final class Game {
 
             }
 
-        };
-
-        ActivateMethod tieRope = (GameState gs, Action act) ->
-        {
-        	Item self = gs.itemList.get("rope");
-
-        	switch (act)
-        	{
-        		case TIE:
-        		{
-        			if (gs.objectFeature.name.equals("bell"))
-        			{
-        				output(GameStrings.BELL_ROPE_TIE);
-                        self.setLocation(Location.BLACK_ROOM);
-                        gs.bellRopeTied = true;
-        				
-        			}
-        		} break;
-
-        		default:
-        		{
-        			output("That's not something you can do with the rope.");
-        		} break;
-        	}
         };
 
 
@@ -420,7 +394,6 @@ public final class Game {
 		bell.setMethod(ringBell);
 		piano.setMethod(playPiano);
 		itemNote.setMethod(readNote);
-		itemRope.setMethod(tieRope);
 		magDoorFeature.setMethod(openMagicDoor);
 		wizard.setMethod(wizardMethod);
 		wizard.setActorMethod(wizardAct);
@@ -447,98 +420,9 @@ public final class Game {
 		
 	}
 
-	private static void createActions()
-	{
-		commandOne.put("north", Action.EXIT_NORTH);
-		commandOne.put("go north", Action.EXIT_NORTH);
-		commandOne.put("walk north", Action.EXIT_NORTH);
-		commandOne.put("exit north", Action.EXIT_NORTH);
-		commandOne.put("n",     Action.EXIT_NORTH);
-		commandOne.put("go n", Action.EXIT_NORTH);
-		commandOne.put("walk n", Action.EXIT_NORTH);
-		commandOne.put("exit n", Action.EXIT_NORTH);
 
-		commandOne.put("south", Action.EXIT_SOUTH);
-		commandOne.put("go south", Action.EXIT_SOUTH);
-		commandOne.put("walk south", Action.EXIT_SOUTH);
-		commandOne.put("exit south", Action.EXIT_SOUTH);
-		commandOne.put("s",     Action.EXIT_SOUTH);
-		commandOne.put("go s",     Action.EXIT_SOUTH);
-		commandOne.put("walk s",     Action.EXIT_SOUTH);
-		commandOne.put("exit s",     Action.EXIT_SOUTH);
 
-		commandOne.put("east",  Action.EXIT_EAST);
-		commandOne.put("e",     Action.EXIT_EAST);
-		commandOne.put("go east",  Action.EXIT_EAST);
-		commandOne.put("walk east",  Action.EXIT_EAST);
-		commandOne.put("exit east",  Action.EXIT_EAST);
-		commandOne.put("go e",     Action.EXIT_EAST);
-		commandOne.put("walk e",     Action.EXIT_EAST);
-		commandOne.put("exit e",     Action.EXIT_EAST);
 
-		commandOne.put("west",  Action.EXIT_WEST);
-		commandOne.put("go west",  Action.EXIT_WEST);
-		commandOne.put("walk west",  Action.EXIT_WEST);
-		commandOne.put("exit west",  Action.EXIT_WEST);
-		commandOne.put("w",     Action.EXIT_WEST);
-		commandOne.put("go w",     Action.EXIT_WEST);
-		commandOne.put("walk w",     Action.EXIT_WEST);
-		commandOne.put("exit w",     Action.EXIT_WEST);
-
-		commandOne.put("up",	Action.EXIT_UP);
-		commandOne.put("go up",	Action.EXIT_UP);
-		commandOne.put("exit up",	Action.EXIT_UP);
-		commandOne.put("u",	    Action.EXIT_UP);
-		commandOne.put("go u",	    Action.EXIT_UP);
-		commandOne.put("exit u",	    Action.EXIT_UP);
-
-		commandOne.put("down",  Action.EXIT_DOWN);
-		commandOne.put("go down",  Action.EXIT_DOWN);
-		commandOne.put("exit down",  Action.EXIT_DOWN);
-		commandOne.put("d",     Action.EXIT_DOWN);
-		commandOne.put("go d",     Action.EXIT_DOWN);
-		commandOne.put("exit d",     Action.EXIT_DOWN);
-
-		commandOne.put("quit",  Action.QUIT);
-		commandOne.put("q",     Action.QUIT);
-		commandOne.put("jump",  Action.JUMP);
-
-		commandOne.put("look",  Action.LOOK);
-		commandOne.put("look around",  Action.LOOK);
-		commandOne.put("l",     Action.LOOK);
-
-		commandOne.put("inventory", Action.INVENTORY);
-		commandOne.put("i",         Action.INVENTORY);
-		commandOne.put("fuck",  Action.PROFANITY);
-		commandOne.put("shit",  Action.PROFANITY);
-		commandOne.put("shout", Action.SHOUT);
-		commandOne.put("yell",  Action.SHOUT);
-		commandOne.put("scream",  Action.SHOUT);
-		commandOne.put("wait", Action.WAIT);
-
-		commandTwo.put("take", Action.TAKE);
-		commandTwo.put("pick up", Action.TAKE);
-		commandTwo.put("drop", Action.DROP);
-		commandTwo.put("open", Action.OPEN);
-		commandTwo.put("close", Action.CLOSE);
-		commandTwo.put("lock", Action.LOCK);
-		commandTwo.put("say", Action.SPEAK);
-		commandTwo.put("ring", Action.RING);
-		commandTwo.put("play", Action.PLAY);
-		commandTwo.put("read", Action.READ);
-		commandTwo.put("kick", Action.KICK);
-		commandTwo.put("hit", Action.ATTACK);
-		commandTwo.put("attack", Action.ATTACK);
-		commandTwo.put("punch", Action.ATTACK);
-		commandTwo.put("slap", Action.SLAP);
-		commandTwo.put("highfive", Action.HIGH_FIVE);
-		commandTwo.put("high five", Action.HIGH_FIVE);
-
-		commandThree.put("open", Action.OPEN);
-		commandThree.put("unlock", Action.UNLOCK);
-		commandThree.put("lock", Action.LOCK);
-		commandThree.put("tie", Action.TIE);
-	}
 
 
 	private static void parsePlayerInput(GameState state, String playerText)
@@ -552,7 +436,30 @@ public final class Game {
 
 		state.resetInput();
 
+		// Just hacking this for the purposes of the demo
+		if (playerText.equals("tie rope to bell")
+			|| playerText.equals("tie rope to lever")
+			|| playerText.equals("attach rope to bell")
+			|| playerText.equals("attach rope to lever"))
+		{
+			state.type = ActionType.INDIRECT;
+			state.first = "tie";
+			state.second = "bell";
+			state.third = "rope";
+
+			return;
+		}
+
 		String[] words = playerText.split(" ");
+
+		for (int i = 0; i < words.length; ++i)
+		{
+			if (!isGameWord(words[i]))
+			{
+				output("I don't know what " + words[i] + " means.");
+				return;
+			}
+		}
 
 		// Make sure we're deleting the words, not portions of other words...
 		playerText = playerText.replaceAll(" the ", " ");
@@ -676,17 +583,8 @@ public final class Game {
 		playerText = playerText.substring(arg3.length()).trim();
 		if (!playerText.isEmpty())
 		{
-			output("I don't know what " + playerText + " means.");
+			output("I don't know what \"" + playerText + "\" means.");
 		}
-
-
-
-
-
-
-		
-		
-
 
 
 
@@ -711,7 +609,6 @@ public final class Game {
 		else if (commandThree.containsKey(first)) { act = commandThree.get(first); }
 		else
 		{ 
-			output("I don't know what \"" + first + "\" means.");
 			return false;
 		}
 
@@ -723,8 +620,7 @@ public final class Game {
 		{
 			output("What do you want to " + first + "?");
 			String input = getPlayerText();
-			String[] addInput = input.split(" ");
-			if (addInput.length == 1)
+			if (isGameWord(input))
 			{
 				second = input;
 			}
@@ -743,8 +639,7 @@ public final class Game {
 			{
 				output("What do you want to " + first + "?");
 				String input = getPlayerText();
-				String[] addInput = input.split(" ");
-				if (addInput.length == 1)
+				if (isGameWord(input))
 				{
 					second = input;
 				}
@@ -758,8 +653,7 @@ public final class Game {
 			output("What do you want to " + first + " the " + second + " with?");
 			{
 				String input2 = getPlayerText();
-				String[] addInput2 = input2.split(" ");
-				if (addInput2.length == 1)
+				if (isGameWord(input2))
 				{
 					third = input2;
 				}
@@ -807,21 +701,29 @@ public final class Game {
 				
 				else 
 				{
-					output("I don't know what \"" + second + "\" means.");
 					return false;
 				}
 
-				if (!third.isEmpty() && state.itemList.containsKey(third))
+				if (!third.isEmpty())
 				{
 				
-					Item it = state.itemList.get(third);
-					if (it.getLocation() != Location.PLAYER_INVENTORY)
+					if (state.itemList.containsKey(third))
 					{
-						output("You're not carrying the " + it.name + ".");
-						return false;
+						Item it = state.itemList.get(third);
+						if (it.getLocation() != Location.PLAYER_INVENTORY)
+						{
+							output("You're not carrying the " + it.name + ".");
+							return false;
+						}
+
+						state.usedItem = it;
 					}
 
-					state.usedItem = it;
+					else
+					{
+						output("That isn't going to work.");
+					}
+					
 
 				}
 			
@@ -1001,7 +903,6 @@ public final class Game {
 			// Simple actions
 
 			case WAIT: { output("Time passes..."); } break;
-			case FAIL_ACTION: { output("Fail action."); } break;
 			case JUMP: { output("Wheeeeeeee!"); } break;
 			case SHOUT: { output("Yaaaaarrrrggghhh!"); } break;
 			case NULL_ACTION: {} break;
@@ -1025,10 +926,115 @@ public final class Game {
 
 	}
 
-	protected static void prompt() { System.out.print(">> "); }
-	protected static void outputLine() { System.out.println(); }
-	protected static void output() { System.out.println(); }
-	protected static void output(String s) { System.out.println(s); }
+
+	// Utility methods used by the other methods in Game.java
+
+	private static void createActions()
+	{
+		commandOne.put("north", Action.EXIT_NORTH);
+		commandOne.put("go north", Action.EXIT_NORTH);
+		commandOne.put("walk north", Action.EXIT_NORTH);
+		commandOne.put("exit north", Action.EXIT_NORTH);
+		commandOne.put("n",     Action.EXIT_NORTH);
+		commandOne.put("go n", Action.EXIT_NORTH);
+		commandOne.put("walk n", Action.EXIT_NORTH);
+		commandOne.put("exit n", Action.EXIT_NORTH);
+
+		commandOne.put("south", Action.EXIT_SOUTH);
+		commandOne.put("go south", Action.EXIT_SOUTH);
+		commandOne.put("walk south", Action.EXIT_SOUTH);
+		commandOne.put("exit south", Action.EXIT_SOUTH);
+		commandOne.put("s",     Action.EXIT_SOUTH);
+		commandOne.put("go s",     Action.EXIT_SOUTH);
+		commandOne.put("walk s",     Action.EXIT_SOUTH);
+		commandOne.put("exit s",     Action.EXIT_SOUTH);
+
+		commandOne.put("east",  Action.EXIT_EAST);
+		commandOne.put("e",     Action.EXIT_EAST);
+		commandOne.put("go east",  Action.EXIT_EAST);
+		commandOne.put("walk east",  Action.EXIT_EAST);
+		commandOne.put("exit east",  Action.EXIT_EAST);
+		commandOne.put("go e",     Action.EXIT_EAST);
+		commandOne.put("walk e",     Action.EXIT_EAST);
+		commandOne.put("exit e",     Action.EXIT_EAST);
+
+		commandOne.put("west",  Action.EXIT_WEST);
+		commandOne.put("go west",  Action.EXIT_WEST);
+		commandOne.put("walk west",  Action.EXIT_WEST);
+		commandOne.put("exit west",  Action.EXIT_WEST);
+		commandOne.put("w",     Action.EXIT_WEST);
+		commandOne.put("go w",     Action.EXIT_WEST);
+		commandOne.put("walk w",     Action.EXIT_WEST);
+		commandOne.put("exit w",     Action.EXIT_WEST);
+
+		commandOne.put("up",	Action.EXIT_UP);
+		commandOne.put("go up",	Action.EXIT_UP);
+		commandOne.put("exit up",	Action.EXIT_UP);
+		commandOne.put("u",	    Action.EXIT_UP);
+		commandOne.put("go u",	    Action.EXIT_UP);
+		commandOne.put("exit u",	    Action.EXIT_UP);
+
+		commandOne.put("down",  Action.EXIT_DOWN);
+		commandOne.put("go down",  Action.EXIT_DOWN);
+		commandOne.put("exit down",  Action.EXIT_DOWN);
+		commandOne.put("d",     Action.EXIT_DOWN);
+		commandOne.put("go d",     Action.EXIT_DOWN);
+		commandOne.put("exit d",     Action.EXIT_DOWN);
+
+		commandOne.put("quit",  Action.QUIT);
+		commandOne.put("q",     Action.QUIT);
+		commandOne.put("jump",  Action.JUMP);
+
+		commandOne.put("look",  Action.LOOK);
+		commandOne.put("look around",  Action.LOOK);
+		commandOne.put("l",     Action.LOOK);
+
+		commandOne.put("inventory", Action.INVENTORY);
+		commandOne.put("i",         Action.INVENTORY);
+		commandOne.put("fuck",  Action.PROFANITY);
+		commandOne.put("shit",  Action.PROFANITY);
+		commandOne.put("shout", Action.SHOUT);
+		commandOne.put("yell",  Action.SHOUT);
+		commandOne.put("scream",  Action.SHOUT);
+		commandOne.put("wait", Action.WAIT);
+
+		commandTwo.put("take", Action.TAKE);
+		commandTwo.put("pick up", Action.TAKE);
+		commandTwo.put("drop", Action.DROP);
+		commandTwo.put("open", Action.OPEN);
+		commandTwo.put("close", Action.CLOSE);
+		commandTwo.put("lock", Action.LOCK);
+		commandTwo.put("say", Action.SPEAK);
+		commandTwo.put("ring", Action.RING);
+		commandTwo.put("play", Action.PLAY);
+		commandTwo.put("read", Action.READ);
+		commandTwo.put("kick", Action.KICK);
+		commandTwo.put("hit", Action.ATTACK);
+		commandTwo.put("attack", Action.ATTACK);
+		commandTwo.put("punch", Action.ATTACK);
+		commandTwo.put("slap", Action.SLAP);
+		commandTwo.put("highfive", Action.HIGH_FIVE);
+		commandTwo.put("high five", Action.HIGH_FIVE);
+
+		commandThree.put("open", Action.OPEN);
+		commandThree.put("unlock", Action.UNLOCK);
+		commandThree.put("lock", Action.LOCK);
+		commandThree.put("tie", Action.TIE);
+	}
+
+	private static void fillDictionary()
+	{
+		for (int i = 0; i < GameStrings.GAME_WORDS.length; ++i)
+		{
+			dictionary.add(GameStrings.GAME_WORDS[i]);
+		}
+	}
+
+	public static void prompt() { System.out.print(">> "); }
+	public static void outputLine() { System.out.println(); }
+	public static void output() { System.out.println(); }
+	public static void output(String s) { System.out.println(s); }
+
 	private static String getPlayerText()
 	{
 		Scanner scn = new Scanner(System.in);
@@ -1068,7 +1074,12 @@ public final class Game {
 		return true;
 	}
 
-	protected static boolean verifyQuit()
+	private static boolean isGameWord(String str)
+	{
+		return (dictionary.contains(str));
+	}
+
+	public static boolean verifyQuit()
 	{
 		boolean result = false;
 		Scanner scn = new Scanner(System.in);

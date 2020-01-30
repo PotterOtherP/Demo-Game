@@ -65,7 +65,7 @@ class GameStrings {
 	"fuck", "go", "hand", "high", "highfive", "hit", "inventory", "jump", "juniper",
 	"key", "kick", "lock", "look", "north", "note", "open", "passage", "piano", "pick",
 	"play", "pull", "punch", "quit", "read", "ring", "room", "rope", "say", "scream",
-	"shit", "shout", "slap", "south", "take", "the", "tie", "unlock", "up", "wait",
+	"shit", "shout", "slap", "south", "take", "the", "tie", "to", "unlock", "up", "wait",
 	"walk", "west", "with", "wizard", "yell"};
 
 	// This class does not get instantiated.
