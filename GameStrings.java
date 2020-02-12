@@ -1,8 +1,8 @@
 class GameStrings {
 	
-	public static final String GAME_INTRO = "Welcome to the cave game.\nYou awaken in a red room. There are exits in all four directions.";
+	public static final String GAME_INTRO = "Welcome to the cave game.\nYou awaken in a red room. There are exits in all four directions: north, south, east and west.";
 	
-	public static final String DESC_RED_ROOM = "This is a red room. There are exits in all four directions.";
+	public static final String DESC_RED_ROOM = "This is a red room. There are exits in all four directions: north, south, east and west.";
 	public static final String DESC_GREEN_ROOM = "This is a green room. There are exits to the east, west, and south.";
 	public static final String DESC_BLACK_ROOM = "This is a black room. There are exits to the north, east, and west." 
 		+ "\nTo the south is a large stone door with some strange symbols engraved on it."
